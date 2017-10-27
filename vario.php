@@ -20,7 +20,7 @@ class Vario extends Module
     {
         $this->name = 'vario';
         $this->tab = 'export';
-        $this->version = '0.4.5';
+        $this->version = '0.4.5.1';
         $this->author = 'Hellit';
         $this->need_instance = 1;
         $this->ps_versions_compliancy = array('min' => '1.7.1.0', 'max' => _PS_VERSION_);
@@ -46,6 +46,7 @@ class Vario extends Module
         }
 
         if (!parent::install() ||
+            //$this->registerHook('NameOfHook') ||
             !$this->registerHook('leftColumn') ||
             !$this->registerHook('header') ||
             !Configuration::updateValue('vario', 'my friend') ||

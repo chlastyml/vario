@@ -134,8 +134,6 @@ class VarioAjaxHelper
     }
 
     public function export_order(){
-        Order::get
-
         return 'export_order';
     }
 
