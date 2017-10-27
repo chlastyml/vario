@@ -6,7 +6,9 @@
  * Time: 10:16
  */
 
-class Order
+require_once('ParentSetting.php');
+
+class OrderVario extends ParentSetting
 {
 
 }

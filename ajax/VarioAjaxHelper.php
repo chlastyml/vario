@@ -8,63 +8,15 @@
 
 require_once('../classes/SoapMe.php');
 require_once('../classes/ImportProduct.php');
+require_once('../classes/ParentSetting.php');
 
-class VarioAjaxHelper
+class VarioAjaxHelper extends ParentSetting
 {
-    private $configDirPath = '';
-    private $configPath = '';
-
-    private $logDirPath = '';
-    private $logPath = '';
-
-    /**
-     * VarioAjaxHelper constructor.
-     */
-    public function __construct()
-    {
-        $this->configDirPath = dirname(__FILE__) . '/../configuration';
-        $this->configPath = $this->configDirPath . '/config.json';
-        $this->logDirPath = dirname(__FILE__) . '/../logs';;
-        $this->logPath = $this->logDirPath . '/log.txt';
-    }
-
-    /**
-     * @return string
-     */
-    public function getConfigDirPath()
-    {
-        return $this->configDirPath;
-    }
-
-    /**
-     * @return string
-     */
-    public function getConfigPath()
-    {
-        return $this->configPath;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLogDirPath()
-    {
-        return $this->logDirPath;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLogPath()
-    {
-        return $this->logPath;
-    }
-
     public function set_params($post){
         $wsdl_url = trim($post['wsdl_url']);
 
-        $CONFIG_DIR_PATH = $this->configDirPath;
-        $CONFIG_PATH = $this->configPath;
+        $CONFIG_DIR_PATH = $this->getConfigDirPath();
+        $CONFIG_PATH = $this->getConfigPath();
 
         $config = array(
             'wsdl_url' => $wsdl_url
@@ -86,8 +38,8 @@ class VarioAjaxHelper
     }
 
     public function get_params(){
-        $CONFIG_DIR_PATH = $this->configDirPath;
-        $CONFIG_PATH = $this->configPath;
+        $CONFIG_DIR_PATH = $this->getConfigDirPath();
+        $CONFIG_PATH = $this->getConfigPath();
 
         if (!file_exists($CONFIG_DIR_PATH) OR !file_exists($CONFIG_PATH)){
             return null;
@@ -134,7 +86,10 @@ class VarioAjaxHelper
     }
 
     public function export_order(){
-        return 'export_order';
+        $sql = 'SELECT * FROM `' . _DB_PREFIX_ . 'orders`';
+        $result = Db::getInstance()->executeS($sql);
+
+        return count($result);
     }
 
     private function getWsdlUrl(){
