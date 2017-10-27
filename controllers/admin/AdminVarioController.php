@@ -26,7 +26,7 @@ class AdminVarioController extends ModuleAdminController
     {
         parent::setMedia();
         $this->addJquery();
-        $jsFile = _MODULE_DIR_.'vario/views/js/vario.js?w=1';
+        $jsFile = _MODULE_DIR_.'vario/views/js/vario.js';
         $this->addJS($jsFile);
     }
 }

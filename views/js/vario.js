@@ -1,5 +1,8 @@
 $(document).ready(function(){
     console.log("#get_params start");
+
+    var lock = false;
+
     $.ajax({
         url: '../modules/vario/ajax/get_params.php',
         data: {
@@ -68,6 +71,9 @@ $(document).ready(function(){
     });
 
     $('#import_vario').click(function(){
+        if(lock)
+            return;
+        lock = true;
         console.log('start: #import_vario');
         $.ajax({
             url:"../modules/vario/ajax/import_product.php",
@@ -83,11 +89,19 @@ $(document).ready(function(){
                 console.log("#import_vario success. " + data);
 
                 resetElements('#import_vario');
+                lock = false;
+            },
+            error:function (data) {
+                lock = false;
+                console.log("#import_vario error. " + data);
             }
         });
     });
 
     $('#export_order').click(function(){
+        if(lock)
+            return;
+        lock = true;
         console.log('start: #export_order');
         $.ajax({
             url:"../modules/vario/ajax/export_order.php",
@@ -102,6 +116,11 @@ $(document).ready(function(){
                 console.log("#export_order success. " + data);
 
                 resetElements('#export_order');
+                lock = false;
+            },
+            error:function (data) {
+                console.log("#export_order error. " + data);
+                lock = false;
             }
         });
     });

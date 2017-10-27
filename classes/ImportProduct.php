@@ -27,8 +27,12 @@ class ImportProduct
     /** @var array $bugRecords */
     private $bugRecords = array();
 
-    public function __construct($wsdl, $hasSentOnVario = false)
+    private $maxOneTime;
+
+    public function __construct($wsdl, $maxOneTime = 50000000, $hasSentOnVario = false)
     {
+        $this->maxOneTime = $maxOneTime;
+
         $this->hasSentOnVario = $hasSentOnVario;
         $this->client = new SoapMe($wsdl);
 
@@ -206,8 +210,14 @@ class ImportProduct
     {
         $prestaProducts = Product::getProducts($this->csLanguage, 0, 0, 'id_product', 'DESC');
 
+        $index = 0;
+
         /** @var VarioProduct $varioProduct */
         foreach ($varioProducts as $varioProduct) {
+            if ($index >= $this->maxOneTime){
+                break;
+            }
+
             $complete_vario_ids = array();
 
             try {
@@ -271,6 +281,8 @@ class ImportProduct
             }catch (Exception $exception){
                 array_push($this->bugRecords, 'IMPORT: ' . $varioProduct->getName() . ': ' . $exception->getMessage());
             }
+
+            $index++;
         }
     }
 
