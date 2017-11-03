@@ -119,6 +119,7 @@ $(document).ready(function(){
                 lock = false;
             },
             error:function (data) {
+                document.getElementById('tag-id').innerHTML = data;
                 console.log("#export_order error. " + data);
                 lock = false;
             }

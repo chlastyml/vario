@@ -244,9 +244,9 @@ class ImportProduct
                 /** @var VarioVariant $varioVariant */
                 foreach ($varioProduct->getVariants() as $varioVariant) {
 
-                    $combination = CombinationCore::getIdByReference($product->id, $varioVariant->getCode());
+                    $combinationId = CombinationCore::getIdByReference($product->id, $varioVariant->getCode());
 
-                    if ($combination == null){
+                    if ($combinationId == null){
                         //tvorba nove kombinace
                         $color = Helper::transferColor($varioVariant->getColor());
                         $size = $varioVariant->getSize();
@@ -272,6 +272,23 @@ class ImportProduct
 
                         $combination = new Combination((int)$idCom);
                         $combination->setAttributes(array($sizeId, $colorId, $sexId));
+
+                        $combinationId = CombinationCore::getIdByReference($product->id, $varioVariant->getCode());
+
+                        $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'product_attribute` SET id_vario = \'' . $varioVariant->getVarioId() . '\' WHERE id_product_attribute = ' . $combinationId . ';';
+                        $orderDetails = Db::getInstance()->execute($sqlInsert);
+
+                    }else{
+                        $sqlVario = 'SELECT id_vario FROM `' . _DB_PREFIX_ . 'product_attribute` WHERE id_product_attribute = ' . $combinationId;
+                        $varioID = Db::getInstance()->executeS($sqlVario);
+                        $varioID = $varioID[0]['id_vario'];
+
+                        if ($varioID !== $varioVariant->getVarioId()) {
+                            $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'product_attribute` SET id_vario = \'' . $varioVariant->getVarioId() . '\' WHERE id_product_attribute = ' . $combinationId . ';';
+                            $orderDetails = Db::getInstance()->execute($sqlInsert);
+                        }
+
+                        $breakpoint = null;
                     }
 
                     array_push($complete_vario_ids, $varioVariant->getVarioId());

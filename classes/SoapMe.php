@@ -28,6 +28,8 @@ class SoapMe
      */
     public function __construct($wsdl = '', $login = null, $password = null)
     {
+        ini_set('max_execution_time', 300);
+
         if (Helper::IsNullOrEmptyString($wsdl))
             throw new Exception('wsdl nemuze byt null nebo prazny retezec');
 
@@ -121,6 +123,16 @@ class SoapMe
     {
         try { // sending request
             return $this->client->GetJobsData($count, $objectType);
+        } catch (SoapFault $fault) {
+            $this->error = $fault;
+        }
+        return null;
+    }
+
+    public function getDocument($param = '{66FE72B0-D17E-42F8-8A9D-81C0D5F8C66A}')
+    {
+        try { // sending request
+            return $this->client->GetDocument($param);
         } catch (SoapFault $fault) {
             $this->error = $fault;
         }

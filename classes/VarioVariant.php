@@ -26,7 +26,7 @@ class VarioVariant
         $this->original = $variant;
         $code = $variant->Data->Code;
         $this->code = $code;
-        $this->vario_id = $variant->Job->ID;
+        $this->vario_id = $variant->Job->ObjectID;
         $this->unique = self::getUniqueFromCode($code);
         $this->sex = self::getSexFromCode($code);
         $this->color = self::getColorFromCode($code);
