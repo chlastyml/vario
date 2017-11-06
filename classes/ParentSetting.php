@@ -25,10 +25,6 @@ abstract class ParentSetting
         if (!file_exists($this->getConfigDirPath())){
             mkdir($this->getConfigDirPath());
         }
-
-        if (file_exists($this->getConfigPath())){
-            unlink($this->getConfigPath());
-        }
     }
 
     /**

@@ -35,6 +35,10 @@ class VarioHelper extends ParentSetting
 
         $json = json_encode($config);
 
+        if (file_exists($this->getConfigPath())){
+            unlink($this->getConfigPath());
+        }
+
         $CONFIG_PATH = $this->getConfigPath();
         $f = fopen($CONFIG_PATH, 'a+');
         fwrite( $f, print_r( $json, true ) . PHP_EOL );
