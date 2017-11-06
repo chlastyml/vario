@@ -213,12 +213,12 @@ class VarioHelper extends ParentSetting
 
                 $json->Addresses = $documentsFromVario->Addresses;
 
-                $result = $this->client->createOrUpdateDocument($json);
+                $varioID = $this->client->createOrUpdateDocument($json);
             } catch (Exception $exception) {
                 return $exception->getMessage();
             }
 
-            $varioID = $this->client->getDocument($result);
+            $document = $this->client->getDocument($varioID);
 
             $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'orders` SET id_vario = \'' . $varioID . '\' WHERE id_order = ' . $order->id . ';';
             Db::getInstance()->execute($sqlInsert);

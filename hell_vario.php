@@ -17,6 +17,8 @@ include_once dirname(__FILE__).'/ajax/VarioHelper.php';
 
 class Hell_Vario extends Module
 {
+    private $automaticFlag = false;
+
     public function __construct()
     {
         $this->name = 'hell_vario';
@@ -111,16 +113,16 @@ class Hell_Vario extends Module
     }
 
     public function hookActionOrderStatusUpdate( $params ) {
-        $newOrderStatus = $params['newOrderStatus'];
-        $statusId = $newOrderStatus->id;
-        $idOrder = $params['id_order'];
+        if ($this->automaticFlag) {
+            $newOrderStatus = $params['newOrderStatus'];
+            $statusId = $newOrderStatus->id;
+            $idOrder = $params['id_order'];
 
-        $order = new Order($idOrder);
+            $order = new Order($idOrder);
 
-        $breakpoint = null;
+            $helper = new VarioHelper(true);
 
-        $helper = new VarioHelper(true);
-
-        $helper->export_order($order, $statusId);
+            $helper->export_order($order, $statusId);
+        }
     }
 }
