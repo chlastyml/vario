@@ -15,11 +15,11 @@ include_once dirname(__FILE__).'/classes/Helper.php';
 include_once dirname(__FILE__).'/classes/VarioProduct.php';
 include_once dirname(__FILE__).'/ajax/VarioHelper.php';
 
-class Vario extends Module
+class Hell_Vario extends Module
 {
     public function __construct()
     {
-        $this->name = 'vario';
+        $this->name = 'hell_vario';
         $this->tab = 'export';
         $this->version = '0.5.2.1';
         $this->author = 'Hellit';
