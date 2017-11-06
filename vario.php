@@ -41,16 +41,6 @@ class Vario extends Module
 
     public function install()
     {
-        $missing_libs = [];
-        if ( !class_exists( 'SoapClient' ) ) {
-            $missing_libs[] = 'SoapClient';
-        }
-
-        if ( count( $missing_libs ) > 0 ) {
-            $this->_errors[] = sprintf( $this->l('Some libraries needed for this module were not found : %s'), implode( ', ', $missing_libs ) );
-            return false;
-        }
-
         if (Shop::isFeatureActive()) {
             Shop::setContext(Shop::CONTEXT_ALL);
         }
