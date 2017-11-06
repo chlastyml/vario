@@ -4,7 +4,7 @@ $(document).ready(function(){
     var lock = false;
 
     $.ajax({
-        url: '../modules/vario/ajax/get_params.php',
+        url: '../modules/hell_vario/ajax/get_params.php',
         data: {
             ajax        : true,
             action      : 'get_params',
@@ -25,7 +25,7 @@ $(document).ready(function(){
     $('#update_vario_wsdl').click(function(){
         console.log('start: #update_vario_wsdl');
         $.ajax({
-            url:"../modules/vario/ajax/set_params.php",
+            url:"../modules/hell_vario/ajax/set_params.php",
             data:{
                 ajax        : true,
                 action      : 'set_params',
@@ -44,7 +44,7 @@ $(document).ready(function(){
     $('#test_vario').click(function(){
         console.log('start: #test_vario');
         $.ajax({
-            url:"../modules/vario/ajax/test_vario.php",
+            url:"../modules/hell_vario/ajax/test_vario.php",
             data:{
                 ajax        : true,
                 action      : 'test_vario',
@@ -76,7 +76,7 @@ $(document).ready(function(){
         lock = true;
         console.log('start: #import_vario');
         $.ajax({
-            url:"../modules/vario/ajax/import_product.php",
+            url:"../modules/hell_vario/ajax/import_product.php",
             data:{
                 ajax        : true,
                 action      : 'import_vario',
@@ -104,7 +104,7 @@ $(document).ready(function(){
         lock = true;
         console.log('start: #export_order');
         $.ajax({
-            url:"../modules/vario/ajax/export_order.php",
+            url:"../modules/hell_vario/ajax/export_order.php",
             data:{
                 ajax        : true,
                 action      : 'export_order',
