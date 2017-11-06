@@ -19,7 +19,7 @@ class Vario extends Module
 {
     public function __construct()
     {
-        $this->name = 'hell_vario';
+        $this->name = 'vario';
         $this->tab = 'export';
         $this->version = '0.4.6.1';
         $this->author = 'Hellit';
