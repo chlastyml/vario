@@ -6,20 +6,21 @@
  * Time: 14:19
  */
 
+require_once('Logger.php');
+
 abstract class ParentSetting
 {
     private $configDirPath = '';
     private $configPath = '';
 
-    private $logDirPath = '';
-    private $logPath = '';
+    private $logger = null;
 
-    public function __construct()
+    public function __construct($loggerName = '')
     {
         $this->configDirPath = dirname(__FILE__) . '/../configuration';
         $this->configPath = $this->configDirPath . '/config.json';
-        $this->logDirPath = dirname(__FILE__) . '/../logs';;
-        $this->logPath = $this->logDirPath . '/log.txt';
+
+        $this->logger = new Logger($loggerName);
     }
 
     /**
@@ -38,19 +39,7 @@ abstract class ParentSetting
         return $this->configPath;
     }
 
-    /**
-     * @return string
-     */
-    public function getLogDirPath()
-    {
-        return $this->logDirPath;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLogPath()
-    {
-        return $this->logPath;
+    public function log($text){
+        $this->logger->logLine($text);
     }
 }

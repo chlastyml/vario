@@ -8,13 +8,25 @@
 
 require_once('../../../config/config.inc.php');
 require_once('../../../init.php');
-require_once('VarioAjaxHelper.php');
+require_once('VarioHelper.php');
 
 if(Tools::getIsset('token') && Tools::getIsset('action'))
 {
-    $ajaxHelper = new VarioAjaxHelper();
+    $sql = 'SELECT * FROM `' . _DB_PREFIX_ . 'orders`';
+    $result = Db::getInstance()->executeS($sql);
 
-    $result = $ajaxHelper->export_order();
+    $ajaxHelper = new VarioHelper(true);
+
+    foreach ($result as $orderRow) {
+        $orderId = $orderRow['id_order'];
+
+        $order = new Order($orderId);
+
+        $ajaxHelper->export_order($order);
+
+        // TODO odstranit
+        break;
+    }
 
     echo $result;
 }
