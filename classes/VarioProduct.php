@@ -17,6 +17,7 @@ class VarioProduct
     private $variants = array();
     private $code = null;
 
+    private $job_id = '';
     private $vario_id = '';
 
     /**
@@ -47,7 +48,8 @@ class VarioProduct
                 if ($this->main != null) {
                     $var = null;
                 }
-                $this->vario_id = $product->Job->ID;
+                $this->job_id = $product->Job->ID;
+                $this->vario_id = $product->Job->ObjectID;
                 $this->main = $product;
                 break;
             case $this->VARIANT_CODE :
@@ -105,6 +107,14 @@ class VarioProduct
             return 'no name';
 
         return trim($this->main->Data->ProductName);
+    }
+
+    /**
+     * @return string
+     */
+    public function getJobId()
+    {
+        return $this->job_id;
     }
 
     /**

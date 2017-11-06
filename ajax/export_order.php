@@ -22,7 +22,7 @@ if(Tools::getIsset('token') && Tools::getIsset('action'))
 
         $order = new Order($orderId);
 
-        $ajaxHelper->export_order($order);
+        $ajaxHelper->export_order($order, $order->current_state);
 
         // TODO odstranit
         break;

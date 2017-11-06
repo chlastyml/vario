@@ -77,11 +77,14 @@ class VarioHelper extends ParentSetting
 
     /**
      * @param $order Order
+     * @param $statusId Int
      * @return null
      */
-    public function export_order($order)
+    public function export_order($order, $statusId)
     {
         /*
+         * ID Nazev                             template
+         ***********************************************
          * 1  Čeká se na platbu šekem           cheque
          * 2  Platba byla přijata               payment
          * 3  Probíhá příprava                  preparation
@@ -96,11 +99,8 @@ class VarioHelper extends ParentSetting
          * 12 U dodavatele (nezaplaceno)        outofstock
          */
 
-        $statusId = $order->current_state;
-
-        if ($statusId == 2 OR
-            $statusId == 11
-        ) {
+        if ($statusId == 2 OR $statusId == 11)
+        {
             $document = new TDocument();
 
             $document->ID = '';

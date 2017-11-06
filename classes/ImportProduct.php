@@ -238,7 +238,7 @@ class ImportProduct
                 }
 
                 // Hodit hlavni product jako zpracovany
-                array_push($complete_vario_ids, $varioProduct->getVarioId());
+                array_push($complete_vario_ids, $varioProduct->getJobId());
 
                 // Tvorba kombinaci
                 /** @var VarioVariant $varioVariant */
@@ -291,7 +291,7 @@ class ImportProduct
                         $breakpoint = null;
                     }
 
-                    array_push($complete_vario_ids, $varioVariant->getVarioId());
+                    array_push($complete_vario_ids, $varioVariant->getJobId());
                 }
 
                 $this->SendJobsComplete($complete_vario_ids);

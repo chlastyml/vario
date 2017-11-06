@@ -17,6 +17,7 @@ class VarioVariant
     private $code = '';
     private $code_id = '';
     private $vario_id = '';
+    private $job_id = '';
 
     /**
      * VarioVariant constructor.
@@ -27,6 +28,7 @@ class VarioVariant
         $code = $variant->Data->Code;
         $this->code = $code;
         $this->vario_id = $variant->Job->ObjectID;
+        $this->job_id = $variant->Job->ID;
         $this->unique = self::getUniqueFromCode($code);
         $this->sex = self::getSexFromCode($code);
         $this->color = self::getColorFromCode($code);
@@ -105,6 +107,14 @@ class VarioVariant
     public function getVarioId()
     {
         return $this->vario_id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getJobId()
+    {
+        return $this->job_id;
     }
 
     public static function getUniqueFromCode($code){

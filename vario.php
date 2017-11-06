@@ -112,6 +112,7 @@ class Vario extends Module
 
     public function hookActionOrderStatusUpdate( $params ) {
         $newOrderStatus = $params['newOrderStatus'];
+        $statusId = $newOrderStatus->id;
         $idOrder = $params['id_order'];
 
         $order = new Order($idOrder);
@@ -120,6 +121,6 @@ class Vario extends Module
 
         $helper = new VarioHelper(true);
 
-        $helper->export_order($order);
+        $helper->export_order($order, $statusId);
     }
 }
