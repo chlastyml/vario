@@ -21,7 +21,7 @@ class Vario extends Module
     {
         $this->name = 'vario';
         $this->tab = 'export';
-        $this->version = '0.4.6.1';
+        $this->version = '0.5.2.1';
         $this->author = 'Hellit';
         $this->controllers = array('vario');
         $this->need_instance = 1;
@@ -30,9 +30,9 @@ class Vario extends Module
 
         parent::__construct();
 
-        $this->displayName = $this->l('Vario Export/Import');
-        $this->description = $this->l('Connect to Altus Vario.');
-        $this->confirmUninstall       = $this->l('Are you sure you want to delete these details?');
+        $this->displayName          = $this->l('Vario Export/Import');
+        $this->description          = $this->l('Connect to Altus Vario.');
+        $this->confirmUninstall     = $this->l('Are you sure you want to delete these details?');
 
         if (!Configuration::get('vario')) {
             $this->warning = $this->l('No name provided');
