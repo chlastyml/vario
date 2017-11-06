@@ -6,7 +6,7 @@
  * Time: 14:19
  */
 
-require_once('Logger.php');
+include_once dirname(__FILE__).'/Logger.php';
 
 abstract class ParentSetting
 {

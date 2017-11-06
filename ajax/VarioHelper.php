@@ -6,11 +6,11 @@
  * Time: 15:38
  */
 
-//require_once('../classes/SoapMe.php');
-require_once('../classes/ImportProduct.php');
-require_once('../classes/ParentSetting.php');
-require_once('../classes/TDocument.php');
-require_once('../classes/TDocumentItem.php');
+include_once dirname(__FILE__).'/../classes/SoapMe.php';
+include_once dirname(__FILE__).'/../classes/ImportProduct.php';
+include_once dirname(__FILE__).'/../classes/ParentSetting.php';
+include_once dirname(__FILE__).'/../classes/TDocument.php';
+include_once dirname(__FILE__).'/../classes/TDocumentItem.php';
 
 class VarioHelper extends ParentSetting
 {

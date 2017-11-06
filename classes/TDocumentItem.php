@@ -6,7 +6,7 @@
  * Time: 10:59
  */
 
-require_once('../classes/ObjectToArray.php');
+include_once dirname(__FILE__).'/ObjectToArray.php';
 
 class TDocumentItem extends ObjectToArray
 {

@@ -6,7 +6,7 @@
  * Time: 10:16
  */
 
-require_once('ParentSetting.php');
+include_once dirname(__FILE__).'/ParentSetting.php';
 
 class OrderVario extends ParentSetting
 {
