@@ -6,7 +6,7 @@
  * Time: 15:38
  */
 
-require_once('../classes/SoapMe.php');
+//require_once('../classes/SoapMe.php');
 require_once('../classes/ImportProduct.php');
 require_once('../classes/ParentSetting.php');
 require_once('../classes/TDocument.php');
@@ -29,23 +29,13 @@ class VarioHelper extends ParentSetting
     public function set_params($post){
         $wsdl_url = trim($post['wsdl_url']);
 
-        $CONFIG_DIR_PATH = $this->getConfigDirPath();
-        $CONFIG_PATH = $this->getConfigPath();
-
         $config = array(
             'wsdl_url' => $wsdl_url
         );
 
-        if (!file_exists($CONFIG_DIR_PATH)){
-            mkdir($CONFIG_DIR_PATH);
-        }
-
-        if (file_exists($CONFIG_PATH)){
-            unlink($CONFIG_PATH);
-        }
-
         $json = json_encode($config);
 
+        $CONFIG_PATH = $this->getConfigPath();
         $f = fopen($CONFIG_PATH, 'a+');
         fwrite( $f, print_r( $json, true ) . PHP_EOL );
         fclose( $f );

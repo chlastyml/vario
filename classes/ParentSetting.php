@@ -21,6 +21,14 @@ abstract class ParentSetting
         $this->configPath = $this->configDirPath . '/config.json';
 
         $this->logger = new Logger($loggerName);
+
+        if (!file_exists($this->getConfigDirPath())){
+            mkdir($this->getConfigDirPath());
+        }
+
+        if (file_exists($this->getConfigPath())){
+            unlink($this->getConfigPath());
+        }
     }
 
     /**
