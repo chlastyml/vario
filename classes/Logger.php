@@ -36,7 +36,26 @@ class Logger
         $f = fopen($this->logPath, 'a+');
         fwrite($f, print_r((new DateTime())->format('Y-m-d H:i:s'), true) . PHP_EOL);
         fwrite($f, print_r($text, true) . PHP_EOL);
-        fwrite($f, print_r('----------------------------------------------------------------------------------------------------------', true) . PHP_EOL);
+        fwrite($f, print_r('----------------------------------------------------------------------', true) . PHP_EOL);
+        fclose($f);
+    }
+
+    public function logLineByNewFile($fileName, $text){
+        $f = fopen($this->logDirPath . '/' . $fileName . '.txt', 'a+');
+        fwrite($f, print_r((new DateTime())->format('Y-m-d H:i:s'), true) . PHP_EOL);
+        fwrite($f, print_r($text, true) . PHP_EOL);
+        fwrite($f, print_r('----------------------------------------------------------------------', true) . PHP_EOL);
+        fclose($f);
+    }
+
+    public function logLineByTimeFile($text){
+        $pathDir = $this->logDirPath . '/' . (new DateTime())->format('Y-m-d');
+        if (!file_exists($pathDir)) {
+            mkdir($pathDir);
+        }
+        $path = $pathDir . '/' . (new DateTime())->format('H-i-s') . '.txt';
+        $f = fopen($path, 'a+');
+        fwrite($f, print_r($text, true) . PHP_EOL);
         fclose($f);
     }
 }

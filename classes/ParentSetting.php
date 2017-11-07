@@ -46,4 +46,8 @@ abstract class ParentSetting
     public function log($text){
         $this->logger->logLine($text);
     }
+
+    public function logTime($text){
+        $this->logger->logLineByTimeFile($text);
+    }
 }

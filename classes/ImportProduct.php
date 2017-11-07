@@ -47,26 +47,27 @@ class ImportProduct
 
         $varioProducts = $this->convertInputOnAbstractObject($products);
 
-        $withoutMain = 0;
         /** @var VarioProduct $varioProduct */
         foreach ($varioProducts as $varioProduct) {
-            if ($varioProduct->getMain() == null)
-                $withoutMain++;
+            if ($varioProduct->getMain() == null) {
+                array_push($this->bugRecords, 'CONVERT (MAIN MISSING): ' . trim($varioProduct->getCode()));
+            }
         }
 
         $this->saveToPresta($varioProducts);
 
-        $result = 'END';
-
+        $result = '';
         foreach ($this->bugRecords as $bugRecord) {
-            $result .= "\r\n" . $bugRecord;
-        }
-
+            if ($this->bugRecords[0] == $bugRecord){
+                $result = $bugRecord;
+            }else {
+                $result .= "\r\n" . $bugRecord;
+            }
+       }
         return $result;
     }
 
     private function generateSlug($input, $sexType = null){
-        //$title = normalizer_normalize($title);
         $input = $input . ' ' . $sexType;
         $input = Helper::remove_accents($input);
         $output = trim($input);
@@ -166,13 +167,16 @@ class ImportProduct
             try {
                 // Data bez Data nebo s neplatnym Bookem ignorujeme
                 if ($product->Data == null OR $product->Data->Book !== 'Katalog Eshop') {
-                    array_push($skip_data, $product->Job->ID);
+                    if ($product->Data == null){
+                        array_push($this->bugRecords, 'CONVERT (SKIP): ' . trim($product->Job->ObjectID) . ', ' . $product->Job->Action);
+                    }else {
+                        //array_push($skip_data, $product->Job->ID);
+                        array_push($this->bugRecords, 'CONVERT (SKIP): ' . $product->Data->Book . ', ' . trim($product->Data->ProductName));
+                    }
                     continue;
                 }
 
                 $varioProduct = null;
-
-                $index2 = 0;
                 /** @var VarioProduct $item */
                 foreach ($varioProducts as $item) {
                     $uniCode = $item->getUniqueFromCode($product);
@@ -184,13 +188,10 @@ class ImportProduct
                             throw new Exception('Duplicita');
                         }
                     }
-
-                    $index2++;
                 }
 
                 if ($varioProduct == null) {
                     $varioProductNew = new VarioProduct($product);
-
                     array_push($varioProducts, $varioProductNew);
                 } else {
                     $varioProduct->addNewItem($product);
@@ -276,7 +277,7 @@ class ImportProduct
                         $combinationId = CombinationCore::getIdByReference($product->id, $varioVariant->getCode());
 
                         $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'product_attribute` SET id_vario = \'' . $varioVariant->getVarioId() . '\' WHERE id_product_attribute = ' . $combinationId . ';';
-                        $orderDetails = Db::getInstance()->execute($sqlInsert);
+                        Db::getInstance()->execute($sqlInsert);
 
                     }else{
                         $sqlVario = 'SELECT id_vario FROM `' . _DB_PREFIX_ . 'product_attribute` WHERE id_product_attribute = ' . $combinationId;
@@ -285,7 +286,7 @@ class ImportProduct
 
                         if ($varioID !== $varioVariant->getVarioId()) {
                             $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'product_attribute` SET id_vario = \'' . $varioVariant->getVarioId() . '\' WHERE id_product_attribute = ' . $combinationId . ';';
-                            $orderDetails = Db::getInstance()->execute($sqlInsert);
+                            Db::getInstance()->execute($sqlInsert);
                         }
 
                         $breakpoint = null;
@@ -317,6 +318,10 @@ class ImportProduct
         return $product;
     }
 
+    /**
+     * @param $varioProduct VarioProduct
+     * @return Product
+     */
     private function createAndFillProduct($varioProduct)
     {
         $product = new Product();

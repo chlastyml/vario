@@ -14,6 +14,8 @@ include_once dirname(__FILE__).'/../classes/TDocumentItem.php';
 
 class VarioHelper extends ParentSetting
 {
+    private $hasChange = false;
+
     private $client = null;
 
     public function __construct($initClient = false)
@@ -68,9 +70,11 @@ class VarioHelper extends ParentSetting
         $import = new ImportProduct($wsdlUrl);
         $result = $import->import_from_vario();
 
-        if ($result !== 'END') {
-            $this->log($result);
+        if ($result !== '') {
+            $this->logTime($result);
         }
+
+        $this->log("Import produktu z varia dokoncen. \r\nWSDL: " . $wsdlUrl);
 
         return $result;
     }
@@ -213,11 +217,16 @@ class VarioHelper extends ParentSetting
 
                 $json->Addresses = $documentsFromVario->Addresses;
 
+                if(!$this->hasChange) {
+                    return null;
+                }
+
                 $varioID = $this->client->createOrUpdateDocument($json);
             } catch (Exception $exception) {
                 return $exception->getMessage();
             }
 
+            // TODO nepotrebne
             $document = $this->client->getDocument($varioID);
 
             $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'orders` SET id_vario = \'' . $varioID . '\' WHERE id_order = ' . $order->id . ';';
@@ -226,7 +235,7 @@ class VarioHelper extends ParentSetting
         return null;
     }
 
-    private function getWsdlUrl(){
+    public function getWsdlUrl(){
         $jsonConfig = json_decode($this->get_params());
 
         if (property_exists($jsonConfig, 'wsdl_url')) {
