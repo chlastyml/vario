@@ -223,7 +223,7 @@ class ImportProduct
 
             try {
                 /** @var Product $product */
-                $product = $this->tryFindExistProduct($varioProduct->getCode(), $prestaProducts);
+                $product = $this->tryFindExistProduct($varioProduct, $prestaProducts);
 
                 // Pokud neni hlavni produkt a produkt neni v databazi, nebo je poslana spatna struktura dat, tak jdu dal
                 if ($varioProduct->getMain() == null){
@@ -309,18 +309,33 @@ class ImportProduct
         }
     }
 
-    private function tryFindExistProduct($code, $prestaProducts)
+    /**
+     * @param $varioProduct VarioProduct
+     * @return null|Product
+     */
+    private function tryFindExistProduct($varioProduct, $prestaProducts)
     {
-        $product = null;
+        if ($varioProduct->getVarioId() == null OR $varioProduct->getVarioId() == ''){
+            return null;
+        }
+
+        // Zkusim najit produkt podle varioID
+        $sqlSelectProduct = "SELECT id_product FROM " . _DB_PREFIX_ . 'product WHERE id_vario = \'' . $varioProduct->getVarioId() . '\'';
+        $varioID_item = Db::getInstance()->getRow($sqlSelectProduct);
+
+        if ($varioID_item){
+            return new Product($varioID_item['id_product']);
+        }
+
+        // Zkusim najit produkt podle code
         /** @var Product $prestaProduct */
         foreach ($prestaProducts as $prestaProduct) {
-            $referrence = $prestaProduct['reference'];
-            if ($referrence == $code) {
-                $product = new Product($prestaProduct['id_product']);
-                break;
+            $reference = $prestaProduct['reference'];
+            if ($reference == $varioProduct->getCode()) {
+                return new Product($prestaProduct['id_product']);
             }
         }
-        return $product;
+        return null;
     }
 
     /**

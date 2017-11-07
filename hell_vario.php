@@ -23,7 +23,7 @@ class Hell_Vario extends Module
     {
         $this->name = 'hell_vario';
         $this->tab = 'export';
-        $this->version = '0.6.2.1';
+        $this->version = '0.6.2.2';
         $this->author = 'Hellit';
         $this->controllers = array('vario');
         $this->need_instance = 1;
@@ -111,12 +111,17 @@ class Hell_Vario extends Module
     }
 
     public function uninstallModuleTab(){
+        return $this->tab->delete();
+
+        /*
         $id_tab = Tab::getIdFromClassName('AdminVario');
+
         if ($id_tab){
             $tab = new Tab($id_tab);
             return $tab->delete();
         }
         return true;
+        */
     }
 
     public function hookActionOrderStatusUpdate( $params ){
