@@ -107,8 +107,7 @@ class VarioHelper extends ParentSetting
         {
             $document = new TDocument();
 
-            $documentsFromVario = $this->client->getDocument();
-            $document->fill($order, $documentsFromVario->Addresses);
+            $document->fill($order);
 
             $document->DocumentItems = array();
             foreach ($order->getOrderDetailList() as $orderDetail) {
@@ -121,6 +120,9 @@ class VarioHelper extends ParentSetting
 
             try {
                 $stdClass = $document->getStdClass();
+
+                $documentsFromVario = $this->client->getDocument();
+                $stdClass->Addresses = $documentsFromVario->Addresses;
 
                 if(!$this->hasChange) {
                     return null;

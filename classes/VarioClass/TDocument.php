@@ -68,7 +68,7 @@ class TDocument extends ObjectToArray
     public $UserFields;
     public $DocumentItems;
 
-    public function fill($order, $address){
+    public function fill($order){
         $this->ID = '';
         $this->Number = '';
         $this->Book = '';
@@ -127,7 +127,7 @@ class TDocument extends ObjectToArray
 
         // Adresa
 
-        $this->Addresses = $address;
+        $this->Addresses = '';
     }
 }
 
