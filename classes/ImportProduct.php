@@ -238,6 +238,10 @@ class ImportProduct
                     $product->save();
                 }
 
+                // Aktualizace vario ID
+                $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'product` SET id_vario = \'' . $varioProduct->getVarioId() . '\' WHERE id_product = ' . $product->id . ';';
+                Db::getInstance()->execute($sqlInsert);
+
                 // Hodit hlavni product jako zpracovany
                 array_push($complete_vario_ids, $varioProduct->getJobId());
 
@@ -276,6 +280,7 @@ class ImportProduct
 
                         $combinationId = CombinationCore::getIdByReference($product->id, $varioVariant->getCode());
 
+                        // Aktualizace vario ID
                         $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'product_attribute` SET id_vario = \'' . $varioVariant->getVarioId() . '\' WHERE id_product_attribute = ' . $combinationId . ';';
                         Db::getInstance()->execute($sqlInsert);
 

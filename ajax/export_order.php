@@ -22,10 +22,30 @@ if(Tools::getIsset('token') && Tools::getIsset('action'))
 
         $order = new Order($orderId);
 
-        $ajaxHelper->export_order($order, $order->current_state);
+        /*
+         * ID Nazev                             template
+         ***********************************************
+         * 1  Čeká se na platbu šekem           cheque
+         * 2  Platba byla přijata               payment
+         * 3  Probíhá příprava                  preparation
+         * 4  Odeslána                          shipped
+         * 5  Dodáno
+         * 6  Zrušeno                           order_canceled
+         * 7  Splaceno                          refund
+         * 8  Chyba platby                      payment_error
+         * 9  U dodavatele (zaplaceno)          outofstock
+         * 10 Čeká se na přijetí bezhotovostní platby       bankwire
+         * 11 Bezhotostní platba přijata        payment
+         * 12 U dodavatele (nezaplaceno)        outofstock
+         */
 
-        // TODO odstranit
-        break;
+        $statusId = $order->current_state;
+
+        if ($statusId == 2 OR $statusId == 11) {
+            $ajaxHelper->export_order($order, $order->current_state);
+            // TODO odstranit
+            break;
+        }
     }
 
     echo $result;

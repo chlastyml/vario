@@ -25,4 +25,9 @@ abstract class ObjectToArray
 
         return $resultArray;
     }
+
+    public function getStdClass(){
+        $json = json_encode($this->getArray());
+        return json_decode($json);
+    }
 }

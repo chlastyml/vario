@@ -23,7 +23,7 @@ class Hell_Vario extends Module
     {
         $this->name = 'hell_vario';
         $this->tab = 'export';
-        $this->version = '0.5.2.1';
+        $this->version = '0.6.2.1';
         $this->author = 'Hellit';
         $this->controllers = array('vario');
         $this->need_instance = 1;
@@ -60,6 +60,7 @@ class Hell_Vario extends Module
 
         $sqlPA = 'ALTER TABLE ' . _DB_PREFIX_ . 'product_attribute ADD `id_vario` VARCHAR(255)';
         $sqlO = 'ALTER TABLE ' . _DB_PREFIX_ . 'orders ADD `id_vario` VARCHAR(255)';
+        $sqlP = 'ALTER TABLE ' . _DB_PREFIX_ . 'product ADD `id_vario` VARCHAR(255)';
         $db = Db::getInstance();
         try {
             $db->Execute( $sqlPA);
@@ -68,6 +69,11 @@ class Hell_Vario extends Module
         }
         try {
             $db->Execute( $sqlO);
+        }catch (Exception $exception){
+            $e = $exception;
+        }
+        try {
+            $db->Execute( $sqlP);
         }catch (Exception $exception){
             $e = $exception;
         }
@@ -143,7 +149,7 @@ class Hell_Vario extends Module
 
             $error = $helper->export_order($order, $statusId);
 
-            $result = $order->id . " - Export objednavky do Varia dokoncen\r\nWSDL: " . $helper->getWsdlUrl();
+            $result = "id_order: " . $order->id . " - Export objednavky do Varia dokoncen\r\nWSDL: " . $helper->getWsdlUrl();
             if ($error !== null) {
                 $result .= "\r\nException: " . $error;
             }
@@ -153,7 +159,8 @@ class Hell_Vario extends Module
     }
 
     public function hookDisplayPDFInvoice( $params ) {
-        $invoice = null;
+        $invoice = $params['object'];
+        $order   = new Order( $invoice->id_order );
 
         /*
             $invoice = $params['object'];
