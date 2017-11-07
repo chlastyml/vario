@@ -111,17 +111,14 @@ class Hell_Vario extends Module
     }
 
     public function uninstallModuleTab(){
-        return $this->tab->delete();
-
-        /*
-        $id_tab = Tab::getIdFromClassName('AdminVario');
-
-        if ($id_tab){
-            $tab = new Tab($id_tab);
-            return $tab->delete();
+        $langs = language::getLanguages();
+        foreach ($langs as $lang) {
+            $tab = Tab::getInstanceFromClassName('AdminVario', $lang->id);
+            if ($tab !== null){
+                return $tab->delete();
+            }
         }
         return true;
-        */
     }
 
     public function hookActionOrderStatusUpdate( $params ){
