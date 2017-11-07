@@ -98,7 +98,7 @@ class Hell_Vario extends Module
         $tab->active = 1;
         $langs = language::getLanguages();
         foreach ($langs as $lang) {
-            $tab->name[$lang['id_lang']] = 'Vario';
+            $tab->name[$lang['id_lang']] = $this->l('Vario');
         }
         $tab->id_parent = 2;
         $tab->position = 6;
@@ -111,17 +111,12 @@ class Hell_Vario extends Module
     }
 
     public function uninstallModuleTab(){
-        return $this->tab->delete();
-
-        /*
         $id_tab = Tab::getIdFromClassName('AdminVario');
-
-        if ($id_tab){
-            $tab = new Tab($id_tab);
-            return $tab->delete();
-        }
+         if ($id_tab) {
+             $tab = new Tab($id_tab);
+             return $tab->delete();
+         }
         return true;
-        */
     }
 
     public function hookActionOrderStatusUpdate( $params ){

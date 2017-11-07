@@ -9,8 +9,8 @@
 include_once dirname(__FILE__).'/../classes/SoapMe.php';
 include_once dirname(__FILE__).'/../classes/ImportProduct.php';
 include_once dirname(__FILE__).'/../classes/ParentSetting.php';
-include_once dirname(__FILE__).'/../classes/TDocument.php';
-include_once dirname(__FILE__).'/../classes/TDocumentItem.php';
+include_once dirname(__FILE__) . '/../classes/VarioClass/TDocument.php';
+include_once dirname(__FILE__) . '/../classes/VarioClass/TDocumentItem.php';
 
 class VarioHelper extends ParentSetting
 {
@@ -106,25 +106,21 @@ class VarioHelper extends ParentSetting
         if ($statusId == 2 OR $statusId == 11)
         {
             $document = new TDocument();
-            $document->fill($order);
 
-            $orderDetailsArray = array();
+            $documentsFromVario = $this->client->getDocument();
+            $document->fill($order, $documentsFromVario->Addresses);
+
+            $document->DocumentItems = array();
             foreach ($order->getOrderDetailList() as $orderDetail) {
 
                 $documentDetail = new TDocumentItem();
                 $documentDetail->fill($orderDetail);
 
-                array_push($orderDetailsArray, $documentDetail->getArray());
+                array_push($document->DocumentItems, $documentDetail->getArray());
             }
-
-            $document->DocumentItems = $orderDetailsArray;
 
             try {
                 $stdClass = $document->getStdClass();
-
-                $documentsFromVario = $this->client->getDocument();
-
-                $stdClass->Addresses = $documentsFromVario->Addresses;
 
                 if(!$this->hasChange) {
                     return null;

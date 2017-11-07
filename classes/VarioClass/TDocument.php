@@ -6,7 +6,7 @@
  * Time: 10:48
  */
 
-include_once dirname(__FILE__).'/ObjectToArray.php';
+include_once dirname(__FILE__) . '/ObjectToArray.php';
 
 class TDocument extends ObjectToArray
 {
@@ -68,7 +68,7 @@ class TDocument extends ObjectToArray
     public $UserFields;
     public $DocumentItems;
 
-    public function fill($order){
+    public function fill($order, $address){
         $this->ID = '';
         $this->Number = '';
         $this->Book = '';
@@ -85,8 +85,8 @@ class TDocument extends ObjectToArray
         $this->SettlementDate = '2017-11-03T00:00:00.000+02:00';
         $this->SettlementMethod = 'Bankovním převodem';
         $this->IO = 1; //směr toku peněz (+1 faktura, pokladní příjmový doklad, výdejka, …, 0 stornovaný doklad, -1 dobropis, pokladní výdajový doklad, vratka výdejky, …)
-        $this->TotalWithoutVAT = $order['total_paid_tax_excl'];
-        $this->TotalWithVAT = $order['total_paid_tax_incl'];
+        $this->TotalWithoutVAT = $order->total_paid_tax_excl;
+        $this->TotalWithVAT = $order->total_paid_tax_incl;
         $this->Rounding = 0;
         $this->RequestedAdvance = 0;
         $this->AdvancePayed = 0;
@@ -100,7 +100,6 @@ class TDocument extends ObjectToArray
         $this->DeliveryCompanyID = '';
         $this->CompanyName = 'TRIKATOR.CZ s.r.o.';
         $this->PersonName = '';
-        $this->Addresses = '';
         $this->IC = '29448310';
         $this->DIC = 'CZ29448310';
         $this->Telephone = '';
@@ -125,6 +124,10 @@ class TDocument extends ObjectToArray
         $this->Data2 = '';
         $this->Note = '';
         $this->UserFields = '';
+
+        // Adresa
+
+        $this->Addresses = $address;
     }
 }
 

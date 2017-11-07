@@ -6,7 +6,7 @@
  * Time: 10:59
  */
 
-include_once dirname(__FILE__).'/ObjectToArray.php';
+include_once dirname(__FILE__) . '/ObjectToArray.php';
 
 class TDocumentItem extends ObjectToArray
 {
@@ -44,6 +44,9 @@ class TDocumentItem extends ObjectToArray
     public $ExternID;
 
     public function fill($orderDetail){
+        $sqlGetProdcutVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "product WHERE id_product = " . $orderDetail['product_id'];
+        $varioID_product = Db::getInstance()->getRow($sqlGetProdcutVarioID)['id_vario'];
+
         $sqlGetItemVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "product_attribute WHERE id_product_attribute = " . $orderDetail['product_attribute_id'];
         $varioID_item = Db::getInstance()->getRow($sqlGetItemVarioID)['id_vario'];
 
@@ -63,7 +66,7 @@ class TDocumentItem extends ObjectToArray
         $this->DiscountRate = 0;
         $this->VATType = "Základní"; // TODO napevno?
         $this->StoreID = "";
-        $this->ProductID = $varioID_item; // TODO doplnit vario ID k produktu
+        $this->ProductID = $varioID_product; // TODO doplnit vario ID k produktu
         $this->VariantID = $varioID_item;
         $this->State = ''; // TODO stav?
         $this->OrderID = '';

@@ -8,6 +8,8 @@
 
 abstract class ObjectToArray
 {
+    public abstract function fill($object);
+
     public function getArray(){
         $class = new ReflectionClass(get_class($this));
 
