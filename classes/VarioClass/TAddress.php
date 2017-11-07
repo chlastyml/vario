@@ -21,8 +21,28 @@ class TAddress extends ObjectToArray
     public $CountryISO;
     public $UseOnDocuments;
 
-    public function fill($object)
+    public function fill($order)
     {
-        // TODO: Implement fill() method.
+        $lang_id = 1;
+
+        $customer = new Customer($order->id_customer);
+        $address = $customer->getAddresses($lang_id)[0];
+        $country = new Country($address['id_country'], $lang_id);
+
+        $this->ID = '';
+        $this->AddressType = 'atPrimary';
+        $this->AddressName = $address['firstname'] . ' ' . $address['lastname'];
+        $this->Street = $address['address1'];
+        $secondAddress = $address['address2'];
+        if ($secondAddress !== ''){
+            $this->Street .= "\r\n" . $address['address2'];
+        }
+        $this->City = $address['city'];
+        $this->ZIP = $address['postcode'];
+        $this->Country = $country->name;
+        $this->CountryISO = $country->iso_code;
+        $this->UseOnDocuments = null;
+
+        $this->Address = $this->Street . "\r\n" . $this->ZIP . " " . $this->City . "\r\n" . $this->Country;
     }
 }

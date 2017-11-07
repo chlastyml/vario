@@ -121,9 +121,6 @@ class VarioHelper extends ParentSetting
             try {
                 $stdClass = $document->getStdClass();
 
-                $documentsFromVario = $this->client->getDocument();
-                $stdClass->Addresses = $documentsFromVario->Addresses;
-
                 if(!$this->hasChange) {
                     return null;
                 }

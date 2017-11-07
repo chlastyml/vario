@@ -7,6 +7,7 @@
  */
 
 include_once dirname(__FILE__) . '/ObjectToArray.php';
+include_once dirname(__FILE__) . '/TAddress.php';
 
 class TDocument extends ObjectToArray
 {
@@ -127,7 +128,12 @@ class TDocument extends ObjectToArray
 
         // Adresa
 
-        $this->Addresses = '';
+        $this->Addresses = array();
+
+        $adres = new TAddress();
+        $adres->fill($order);
+
+        array_push($this->Addresses, $adres);
     }
 }
 
