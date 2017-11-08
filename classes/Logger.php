@@ -33,10 +33,17 @@ class Logger
     }
 
     public function logLine($text){
-        $f = fopen($this->logPath, 'a+');
+        $logPath = $this->logDirPath . '/' . (new DateTime())->format('d-m-Y') . '.txt';
+
+        $backupText = file_get_contents($logPath);
+
+        unlink($logPath);
+
+        $f = fopen($logPath, 'a+');
         fwrite($f, print_r((new DateTime())->format('Y-m-d H:i:s'), true) . PHP_EOL);
         fwrite($f, print_r($text, true) . PHP_EOL);
         fwrite($f, print_r('----------------------------------------------------------------------', true) . PHP_EOL);
+        fwrite($f, print_r($backupText, true) . PHP_EOL);
         fclose($f);
     }
 

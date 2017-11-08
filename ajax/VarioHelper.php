@@ -67,7 +67,11 @@ class VarioHelper extends ParentSetting
             $this->logTime($result);
         }
 
-        $this->log("Import produktu z varia dokoncen. \r\nWSDL: " . $wsdlUrl);
+        $this->log("Import produktu z varia dokoncen." .
+                        "\n\rCelkovy pocet setJobData " . $import->getSetJobDataCount() . " a preskoceno " . $import->getSetJobDataSkipCount() . " zaznamu" .
+                        "\n\rNebyl poslan hlavni produkt a ani nebyl nalezen v prestashopu: " . $import->getVarioProductSkip() .
+                        "\n\rImportovano " . $import->getProductImportedCount() . " produktu a " . $import->getCombinationImportedCount() . " variant" .
+                        "\n\rWSDL: " . $wsdlUrl);
 
         return $result;
     }

@@ -27,12 +27,14 @@ class ImportProduct
     /** @var array $bugRecords */
     private $bugRecords = array();
 
-    private $maxOneTime;
+    private $setJobDataCount = 0;
+    private $setJobDataSkipCount = 0;
+    private $varioProductSkip = 0;
+    private $productImportedCount = 0;
+    private $combinationImportedCount = 0;
 
-    public function __construct($wsdl, $maxOneTime = 50000000, $hasSentOnVario = false)
+    public function __construct($wsdl, $hasSentOnVario = false)
     {
-        $this->maxOneTime = $maxOneTime;
-
         $this->hasSentOnVario = $hasSentOnVario;
         $this->client = new SoapMe($wsdl);
 
@@ -40,10 +42,52 @@ class ImportProduct
         $this->loadAttributes();
     }
 
+    /**
+     * @return int
+     */
+    public function getSetJobDataCount()
+    {
+        return $this->setJobDataCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSetJobDataSkipCount()
+    {
+        return $this->setJobDataSkipCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getVarioProductSkip()
+    {
+        return $this->varioProductSkip;
+    }
+
+    /**
+     * @return int
+     */
+    public function getProductImportedCount()
+    {
+        return $this->productImportedCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCombinationImportedCount()
+    {
+        return $this->combinationImportedCount;
+    }
+
     public function import_from_vario(){
         $this->bugRecords = array();
 
         $products = $this->client->getJobsData(3000);
+
+        $this->setJobDataCount = count($products);
 
         $varioProducts = $this->convertInputOnAbstractObject($products);
 
@@ -167,6 +211,7 @@ class ImportProduct
             try {
                 // Data bez Data nebo s neplatnym Bookem ignorujeme
                 if ($product->Data == null OR $product->Data->Book !== 'Katalog Eshop') {
+                    $this->setJobDataSkipCount++;
                     if ($product->Data == null){
                         array_push($this->bugRecords, 'CONVERT (SKIP): ' . trim($product->Job->ObjectID) . ', ' . $product->Job->Action);
                     }else {
@@ -198,6 +243,7 @@ class ImportProduct
                 }
             } catch (Exception $exception) {
                 array_push($this->bugRecords, 'CONVERT: ' . trim($product->Data->ProductName) . ': ' . $exception->getMessage());
+                $this->setJobDataSkipCount++;
             }
         }
 
@@ -211,14 +257,8 @@ class ImportProduct
     {
         $prestaProducts = Product::getProducts($this->csLanguage, 0, 0, 'id_product', 'DESC');
 
-        $index = 0;
-
         /** @var VarioProduct $varioProduct */
         foreach ($varioProducts as $varioProduct) {
-            if ($index >= $this->maxOneTime){
-                break;
-            }
-
             $complete_vario_ids = array();
 
             try {
@@ -228,6 +268,8 @@ class ImportProduct
                 // Pokud neni hlavni produkt a produkt neni v databazi, nebo je poslana spatna struktura dat, tak jdu dal
                 if ($varioProduct->getMain() == null){
                     if (!$varioProduct->isStructuralAlright() OR $product == null){
+                        $this->varioProductSkip++;
+                        array_push($this->bugRecords, 'IMPORT (SKIP): ' . $varioProduct->getCode());
                         continue;
                     }
                 }
@@ -236,6 +278,7 @@ class ImportProduct
                 if ($product == null) {
                     $product = $this->createAndFillProduct($varioProduct);
                     $product->save();
+                    $this->productImportedCount++;
                 }
 
                 // Aktualizace vario ID
@@ -284,6 +327,8 @@ class ImportProduct
                         $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'product_attribute` SET id_vario = \'' . $varioVariant->getVarioId() . '\' WHERE id_product_attribute = ' . $combinationId . ';';
                         Db::getInstance()->execute($sqlInsert);
 
+                        $this->combinationImportedCount++;
+
                     }else{
                         $sqlVario = 'SELECT id_vario FROM `' . _DB_PREFIX_ . 'product_attribute` WHERE id_product_attribute = ' . $combinationId;
                         $varioID = Db::getInstance()->executeS($sqlVario);
@@ -304,8 +349,6 @@ class ImportProduct
             }catch (Exception $exception){
                 array_push($this->bugRecords, 'IMPORT: ' . $varioProduct->getName() . ': ' . $exception->getMessage());
             }
-
-            $index++;
         }
     }
 

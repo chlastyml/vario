@@ -197,10 +197,17 @@ class TDocument extends ObjectToArray
         $this->addAddress(new TAddress($deliveryAddress));
         $this->addAddress(new TAddress($invoiceAddress));
 
+        $sqlTax_id = 'SELECT pt.rate FROM ' . _DB_PREFIX_ . 'tax pt
+                    LEFT JOIN ' . _DB_PREFIX_ . 'order_invoice_tax poit ON poit.id_tax=pt.id_tax
+                    LEFT JOIN ' . _DB_PREFIX_ . 'order_invoice poi ON poi.id_order_invoice=poit.id_order_invoice
+                    LEFT JOIN ' . _DB_PREFIX_ . 'orders po ON po.id_order=poi.id_order
+                    WHERE po.id_order = ' . $order->id;
+        $tax_rate = Db::getInstance()->getRow($sqlTax_id)['rate'];
+
         $documentOrderNumber = 1;
         // TDocumentItems
         foreach ($order->getOrderDetailList() as $orderDetail) {
-            $this->addDocumentItem(new TDocumentItem($orderDetail, $documentOrderNumber));
+            $this->addDocumentItem(new TDocumentItem($orderDetail, $documentOrderNumber, $tax_rate));
             $documentOrderNumber++;
         }
     }

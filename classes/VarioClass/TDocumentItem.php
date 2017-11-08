@@ -43,7 +43,7 @@ class TDocumentItem extends ObjectToArray
     public $Number2;
     public $ExternID;
 
-    public function __construct($orderDetail, $documentOrderNumber){
+    public function __construct($orderDetail, $documentOrderNumber, $tax_rate){
         $sqlGetProdcutVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "product WHERE id_product = " . $orderDetail['product_id'];
         $varioID_product = Db::getInstance()->getRow($sqlGetProdcutVarioID)['id_vario'];
 
@@ -76,7 +76,7 @@ class TDocumentItem extends ObjectToArray
         $this->TotalPrice = $orderDetail['total_price_tax_excl'];
 
         // (Polozky_dokladu.Sazba_DPH) sazba DPH, při zápisu nutno vyplnit
-        $this->VATRate = 21; // TODO napevno?
+        $this->VATRate = $tax_rate;
         // (Polozky_dokladu.Sleva_polozky) výše slevy
         $this->DiscountRate = 0;
         // (Polozky_dokladu.Zdanitelne_plneni) typ zdanitelného plnění (Základ daně, Z tuzemska, …)

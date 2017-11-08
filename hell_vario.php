@@ -125,16 +125,11 @@ class Hell_Vario extends Module
         $helper->export_order($params['id_order'], $statusId);
     }
 
-    public function hookDisplayPDFInvoice( $params ) {
+    public function hookDisplayPDFInvoice( $params ){
         $invoice = $params['object'];
-        $order   = new Order( $invoice->id_order );
-
-        /*
-            $invoice = $params['object'];
-                $order   = new Order( $invoice->id_order );
-                if ( $order->module == 'hell_twistopayment' ) {
-                        header( 'Location: /modules/hell_twistopayment/invoices/' . $order->reference . '.pdf' );
-                }
-         */
+        $order = new Order($invoice->id_order);
+        if ($order->module == 'ps_wirepayment') {
+            header('Location: /modules/hell_vario/invoices/' . $order->reference . '.pdf');
+        }
     }
 }
