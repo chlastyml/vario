@@ -82,7 +82,6 @@ class VarioHelper extends ParentSetting
     /**
      * @param $order Order
      * @param $statusId Int
-     * @return null
      */
     public function export_order($order, $statusId)
     {
@@ -105,29 +104,20 @@ class VarioHelper extends ParentSetting
 
         if ($statusId == 2 OR $statusId == 11)
         {
-            $document = new TDocument();
-
-            $document->fill($order);
-
-            $document->DocumentItems = array();
-            foreach ($order->getOrderDetailList() as $orderDetail) {
-
-                $documentDetail = new TDocumentItem();
-                $documentDetail->fill($orderDetail);
-
-                array_push($document->DocumentItems, $documentDetail->getArray());
-            }
+            // Convert na znamou entitu
+            $document = new TDocument($order);
 
             try {
                 $stdClass = $document->getStdClass();
 
-                if(!$this->hasChange) {
-                    return null;
+                if ($this->hasChange) {
+                    return;
                 }
 
                 $varioID = $this->client->createOrUpdateDocument($stdClass);
             } catch (Exception $exception) {
-                return $exception->getMessage();
+                $this->log('ERROR (send order to vario): ' . $exception->getMessage());
+                return;
             }
 
             // TODO nepotrebne
@@ -136,7 +126,6 @@ class VarioHelper extends ParentSetting
             $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'orders` SET id_vario = \'' . $varioID . '\' WHERE id_order = ' . $order->id . ';';
             Db::getInstance()->execute($sqlInsert);
         }
-        return null;
     }
 
     public function load_order_invoice(){

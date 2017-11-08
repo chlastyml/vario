@@ -43,44 +43,77 @@ class TDocumentItem extends ObjectToArray
     public $Number2;
     public $ExternID;
 
-    public function fill($orderDetail){
+    public function __construct($orderDetail){
         $sqlGetProdcutVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "product WHERE id_product = " . $orderDetail['product_id'];
         $varioID_product = Db::getInstance()->getRow($sqlGetProdcutVarioID)['id_vario'];
 
         $sqlGetItemVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "product_attribute WHERE id_product_attribute = " . $orderDetail['product_attribute_id'];
         $varioID_item = Db::getInstance()->getRow($sqlGetItemVarioID)['id_vario'];
 
+        // (Polozky_dokladu.rowguid) ID položky dokladu, pokud se nepošle při založení, doplní se, při aktualizaci povinné
         $this->ID = '';
+        // (Doklady.rowguid) ID dokladu, pokud se položka zapisuje samostatně, nutno vyplnit
         $this->DocumentID = '';
+        // (Polozky_dokladu.Polozka_dokladu) číslo (pořadí) položky, v rámci dokladu musí být unikátní
         $this->DocumentOrderNumber = 1;
-        $this->Description = "Document item 1";
+        // (Polozky_dokladu.Popis) popis
+        $this->Description = "";
+        // (Polozky_dokladu.Cislo) (katalogové) číslo
         $this->ItemNumber = "";
+        // (Polozky_dokladu.Mnozstvi) množství
         $this->Quantity = $orderDetail['product_quantity'];
-        $this->QuantityUnit = "Ks";
+        // (Polozky_dokladu.Jednotky) jednotka
+        $this->QuantityUnit = "Ks"; // TODO napevno?
+        // (Polozky_dokladu.Cena_zakladni) základní cena
         $this->GPL = null;
+        // (Polozky_dokladu.Cena_za_jednotku) cena za jednotku, při zápisu nutno vyplnit
         $this->PricePerUnit = $orderDetail['unit_price_tax_incl'];
+        // (Polozky_dokladu.Cena_bez_DPH) cena celkem bez DPH, při zápisu nutno vyplnit
         $this->PriceWithoutVAT = $orderDetail['unit_price_tax_excl'];
+        // (Polozky_dokladu.DPH_celkem) celkem DPH, při zápisu nutno vyplnit
         $this->TotalVAT = $orderDetail['total_price_tax_incl'];
+        // (Polozky_dokladu.Cena_s_DPH) celková cena včetně DPH, při zápisu nutno vyplnit
         $this->TotalPrice = $orderDetail['total_price_tax_excl'];
+
+        // (Polozky_dokladu.Sazba_DPH) sazba DPH, při zápisu nutno vyplnit
         $this->VATRate = 21; // TODO napevno?
+        // (Polozky_dokladu.Sleva_polozky) výše slevy
         $this->DiscountRate = 0;
+        // (Polozky_dokladu.Zdanitelne_plneni) typ zdanitelného plnění (Základ daně, Z tuzemska, …)
         $this->VATType = "Základní"; // TODO napevno?
+        // (Knihy.rowguid) ID skladu
         $this->StoreID = "";
+        // (Katalog.rowguid) ID produktu
         $this->ProductID = $varioID_product; // TODO doplnit vario ID k produktu
+        // (Katalog_varianty_produktu.rowguid) ID varianty
         $this->VariantID = $varioID_item;
+        // (Polozky_dokladu.Stav) stav položky (DODAT, rezervovat, REZERVOVÁNO, fakturovat lze zapsat)
         $this->State = ''; // TODO stav?
+        // (Doklady.rowguid) ID související zakázky (např. u faktur)
         $this->OrderID = '';
+        // (Polozky_dokladu.Datum_dodani) (požadovaný) datum dodání
         $this->DeliveryDate = null; // TODO datum dodani
+        // (Doklady.rowguid) ID dodacího listu (výdejky)
         $this->QuantityGroups = array();
+        // (Polozky_dokladu.rowguid) ID položky dodacího listu (výdejky)
         $this->DeliveryNoteID = '';
+        // (Doklady.rowguid) ID související zakázky
         $this->DeliveryNoteItemID = '';
+        // (Polozky_dokladu.rowguid) ID související položky zakázky
         $this->CommissionID = '';
+        // (Polozky_dokladu.Poznamka_polozky) poznámka
         $this->CommissionItemID = '';
+        // (Polozky_dokladu.Poznamka_polozky) poznámka
         $this->Note = '';
+        //
         $this->Data1 = '';
+        //
         $this->Data2 = '';
+        //
         $this->Number1 = 0;
+        //
         $this->Number2 = 0;
+        // volné pole pro případnou identifikaci položky shopem
         $this->ExternID = $orderDetail['id_order_detail'];
     }
 }

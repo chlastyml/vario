@@ -48,5 +48,5 @@ if(Tools::getIsset('token') && Tools::getIsset('action'))
         }
     }
 
-    echo $result;
+    echo 'Export Complete';
 }

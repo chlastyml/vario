@@ -43,6 +43,10 @@ abstract class ParentSetting
         return $this->configPath;
     }
 
+    /**
+     * Obecna logovaci funkce.
+     * @param $text
+     */
     public function log($text){
         $this->logger->logLine($text);
     }
