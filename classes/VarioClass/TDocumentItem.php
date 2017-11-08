@@ -43,7 +43,7 @@ class TDocumentItem extends ObjectToArray
     public $Number2;
     public $ExternID;
 
-    public function __construct($orderDetail){
+    public function __construct($orderDetail, $documentOrderNumber){
         $sqlGetProdcutVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "product WHERE id_product = " . $orderDetail['product_id'];
         $varioID_product = Db::getInstance()->getRow($sqlGetProdcutVarioID)['id_vario'];
 
@@ -55,7 +55,7 @@ class TDocumentItem extends ObjectToArray
         // (Doklady.rowguid) ID dokladu, pokud se položka zapisuje samostatně, nutno vyplnit
         $this->DocumentID = '';
         // (Polozky_dokladu.Polozka_dokladu) číslo (pořadí) položky, v rámci dokladu musí být unikátní
-        $this->DocumentOrderNumber = 1;
+        $this->DocumentOrderNumber = $documentOrderNumber; // TODO nemusi
         // (Polozky_dokladu.Popis) popis
         $this->Description = "";
         // (Polozky_dokladu.Cislo) (katalogové) číslo

@@ -14,18 +14,11 @@ include_once dirname(__FILE__) . '/../classes/VarioClass/TDocumentItem.php';
 
 class VarioHelper extends ParentSetting
 {
-    private $hasChange = false;
-
     private $client = null;
 
-    public function __construct($initClient = false)
+    public function __construct()
     {
         parent::__construct();
-
-        if ($initClient) {
-            $wsdlUrl = $this->getWsdlUrl();
-            $this->client = new SoapMe($wsdlUrl);
-        }
     }
 
     public function set_params($post){
@@ -80,51 +73,52 @@ class VarioHelper extends ParentSetting
     }
 
     /**
-     * @param $order Order
+     * @param $orderId int
      * @param $statusId Int
      */
-    public function export_order($order, $statusId)
+    public function export_order($orderId, $statusId)
     {
         /*
-         * ID Nazev                             template
-         ***********************************************
-         * 1  Čeká se na platbu šekem           cheque
-         * 2  Platba byla přijata               payment
-         * 3  Probíhá příprava                  preparation
-         * 4  Odeslána                          shipped
+         * ID Nazev                                         template
+         ****************************************************************
+         * 1  Čeká se na platbu šekem                       cheque
+         * 2  Platba byla přijata                           payment
+         * 3  Probíhá příprava                              preparation
+         * 4  Odeslána                                      shipped
          * 5  Dodáno
-         * 6  Zrušeno                           order_canceled
-         * 7  Splaceno                          refund
-         * 8  Chyba platby                      payment_error
-         * 9  U dodavatele (zaplaceno)          outofstock
+         * 6  Zrušeno                                       order_canceled
+         * 7  Splaceno                                      refund
+         * 8  Chyba platby                                  payment_error
+         * 9  U dodavatele (zaplaceno)                      outofstock
          * 10 Čeká se na přijetí bezhotovostní platby       bankwire
-         * 11 Bezhotostní platba přijata        payment
-         * 12 U dodavatele (nezaplaceno)        outofstock
+         * 11 Bezhotostní platba přijata                    payment
+         * 12 U dodavatele (nezaplaceno)                    outofstock
          */
 
         if ($statusId == 2 OR $statusId == 11)
         {
+            $order = new Order($orderId);
+
             // Convert na znamou entitu
             $document = new TDocument($order);
 
             try {
                 $stdClass = $document->getStdClass();
 
-                if ($this->hasChange) {
-                    return;
-                }
+                $varioID = $this->getClient()->createOrUpdateDocument($stdClass);
 
-                $varioID = $this->client->createOrUpdateDocument($stdClass);
+                // TODO nepotrebne
+                $document = $this->getClient()->getDocument($varioID);
+
+                $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'orders` SET id_vario = \'' . $varioID . '\' WHERE id_order = ' . $order->id . ';';
+                Db::getInstance()->execute($sqlInsert);
+
+                // TODO: Zmenit stav objednavky?
+
+                $this->log("id_order: " . $order->id . " - Export objednavky do Varia dokoncen\r\nWSDL: " . $this->getWsdlUrl());
             } catch (Exception $exception) {
-                $this->log('ERROR (send order to vario): ' . $exception->getMessage());
-                return;
+                $this->log("ERROR (send order to vario)\r\nid_order: " . $order->id . "\r\nMessage: " . $exception->getMessage());
             }
-
-            // TODO nepotrebne
-            $document = $this->client->getDocument($varioID);
-
-            $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'orders` SET id_vario = \'' . $varioID . '\' WHERE id_order = ' . $order->id . ';';
-            Db::getInstance()->execute($sqlInsert);
         }
     }
 
@@ -140,5 +134,17 @@ class VarioHelper extends ParentSetting
         }
 
         throw new Exception('wsdl_url not found');
+    }
+
+    /**
+     * @return SoapMe
+     */
+    public function getClient()
+    {
+        if ($this->client == null){
+            $this->client = new SoapMe($this->getWsdlUrl());
+        }
+
+        return $this->client;
     }
 }

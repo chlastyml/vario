@@ -17,13 +17,11 @@ include_once dirname(__FILE__).'/ajax/VarioHelper.php';
 
 class Hell_Vario extends Module
 {
-    private $automaticFlag = false;
-
     public function __construct()
     {
         $this->name = 'hell_vario';
         $this->tab = 'export';
-        $this->version = '0.7.2.2';
+        $this->version = '0.8.2.2';
         $this->author = 'Hellit';
         $this->controllers = array('vario');
         $this->need_instance = 1;
@@ -120,42 +118,11 @@ class Hell_Vario extends Module
     }
 
     public function hookActionOrderStatusUpdate( $params ){
-        /*
-         * ID Nazev                             template
-         ******************************************************************
-         * 1  Čeká se na platbu šekem                       cheque
-         * 2  Platba byla přijata                           payment
-         * 3  Probíhá příprava                              preparation
-         * 4  Odeslána                                      shipped
-         * 5  Dodáno
-         * 6  Zrušeno                                       order_canceled
-         * 7  Splaceno                                      refund
-         * 8  Chyba platby                                  payment_error
-         * 9  U dodavatele (zaplaceno)                      outofstock
-         * 10 Čeká se na přijetí bezhotovostní platby       bankwire
-         * 11 Bezhotostní platba přijata                    payment
-         * 12 U dodavatele (nezaplaceno)                    outofstock
-         */
-
         $newOrderStatus = $params['newOrderStatus'];
         $statusId = $newOrderStatus->id;
 
-        if ($statusId == 2 OR $statusId == 11) {
-            $idOrder = $params['id_order'];
-
-            $order = new Order($idOrder);
-
-            $helper = new VarioHelper(true);
-
-            $error = $helper->export_order($order, $statusId);
-
-            $result = "id_order: " . $order->id . " - Export objednavky do Varia dokoncen\r\nWSDL: " . $helper->getWsdlUrl();
-            if ($error !== null) {
-                $result .= "\r\nException: " . $error;
-            }
-
-            $helper->log($result);
-        }
+        $helper = new VarioHelper();
+        $helper->export_order($params['id_order'], $statusId);
     }
 
     public function hookDisplayPDFInvoice( $params ) {

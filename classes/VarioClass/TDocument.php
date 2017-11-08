@@ -75,12 +75,11 @@ class TDocument extends ObjectToArray
      */
     public function __construct($order)
     {
-        $lang_id = 1;
-
         $customer = new Customer($order->id_customer);
         $currency = new Currency($order->id_currency);
-        /** @var Address $address */
-        $address = $customer->getAddresses($lang_id)[0];
+
+        $deliveryAddress = new Address($order->id_address_delivery);
+        $invoiceAddress = new Address($order->id_address_invoice);
 
         // (Doklady.rowguid) ID dokladu, pokud se nepošle při založení, doplní se, při aktualizaci povinné
         $this->ID = '';
@@ -141,15 +140,16 @@ class TDocument extends ObjectToArray
         // (Firmy.Kontakt_zbozi_dorucit), CustomerID pro zboží doručit
         $this->DeliveryCompanyID = ''; // TODO doplnit
         // (Doklady.Nazev_firmy) obchodní jméno zákazníka (Customer)
-        $this->CompanyName = ''; // TODO doplnit
+        $this->CompanyName = $invoiceAddress->company; // TODO doplnit
         // (Doklady.Jmeno) jméno osoby
-        $this->PersonName = $customer->firstname . ' ' . $customer->lastname;
+        $this->PersonName = $invoiceAddress->firstname . ' ' . $invoiceAddress->lastname; // TODO jmena na adrese nebo na uzivateli
         // (Doklady.ICO) IČ
         $this->IC = ''; // TODO doplnit
         // (Doklady.DIC) DIČ
-        $this->DIC = ''; // TODO doplnit
+        $this->DIC = $invoiceAddress->company; // TODO doplnit
         // (Doklady.Telefon) telefon
-        $this->Telephone = $this->getPhoneNumber($customer);
+        //$this->Telephone = $this->getPhoneNumber($customer);
+        $this->Telephone = $invoiceAddress->phone;
         // (Doklady.E_mail) e-mail
         $this->Email = $customer->email;
         // (Doklady.Banka) jméno banky, bankovní spojení
@@ -194,15 +194,14 @@ class TDocument extends ObjectToArray
         $this->UserFields = '';  // TODO Asi nevyplnovat
 
         // Adresa
-        $this->Addresses = array();
-        /** @var Address $address */
-        foreach ($customer->getAddresses($lang_id) as $address){
-            array_push($this->Addresses, new TAddress($customer, $address));
-        }
+        $this->addAddress(new TAddress($deliveryAddress));
+        $this->addAddress(new TAddress($invoiceAddress));
 
+        $documentOrderNumber = 1;
         // TDocumentItems
         foreach ($order->getOrderDetailList() as $orderDetail) {
-            $this->addDocumentItem(new TDocumentItem($orderDetail));
+            $this->addDocumentItem(new TDocumentItem($orderDetail, $documentOrderNumber));
+            $documentOrderNumber++;
         }
     }
 
@@ -213,23 +212,16 @@ class TDocument extends ObjectToArray
         if ($this->DocumentItems == null OR !is_array($this->DocumentItems)){
             $this->DocumentItems = array();
         }
-
-        array_push($this->DocumentItems, $documentItem->getArray());
+        array_push($this->DocumentItems, $documentItem);
     }
 
     /**
-     * @param $customer Customer
-     * @return null|string
+     * @param $address TAddress
      */
-    private function getPhoneNumber($customer){
-        $lang_id = 1;
-
-        /** @var Address $address */
-        foreach ($customer->getAddresses($lang_id) as $address) {
-            $phone = $address['phone'];
-            if ($phone !== null AND $phone !== '')
-                return $phone;
+    private function addAddress($address){
+        if ($this->Addresses == null OR !is_array($this->Addresses)){
+            $this->Addresses = array();
         }
-        return null;
+        array_push($this->Addresses, $address);
     }
 }
