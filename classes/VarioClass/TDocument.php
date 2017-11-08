@@ -94,7 +94,7 @@ class TDocument extends ObjectToArray
         //  (Doklady.Mena) měna
         $this->Currency = $currency->iso_code;
         // (Doklady.Fakturovat) pokud je true, doklad se nemá fakturovat
-        $this->DontMakeInvoice = true;
+        $this->DontMakeInvoice = false;
         // (Doklady.Variabilni_symbol) variabilní symbol (u typu dokladu ZZ se použije pole OrderNumber, pokud není vyplněno)
         $this->VarNumber = null; // TODO
         // (Doklady.Komentar) komentář
