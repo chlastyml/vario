@@ -21,7 +21,7 @@ class Hell_Vario extends Module
     {
         $this->name = 'hell_vario';
         $this->tab = 'export';
-        $this->version = '0.8.8.1';
+        $this->version = '0.8.8.8';
         $this->author = 'Hellit';
         $this->controllers = array('vario');
         $this->need_instance = 1;
@@ -133,11 +133,11 @@ class Hell_Vario extends Module
     }
 
     public function hookActionOrderEdited( $params ){
-        $newOrderStatus = $params['newOrderStatus'];
-        $statusId = $newOrderStatus->id;
+        /** @var Order $order */
+        $order = $params['order'];
 
         $helper = new VarioHelper();
-        $helper->export_order($params['id_order'], $statusId);
+        $helper->export_order($order->id, $order->current_state);
     }
 
     public function hookDisplayPDFInvoice( $params ){

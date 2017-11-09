@@ -109,15 +109,13 @@ class VarioHelper extends ParentSetting
 
                 $varioID = $this->getClient()->createOrUpdateDocument($stdClass);
 
-                // TODO nepotrebne, jen pro kontrolu DEBUG
-                $documentFromVario = $this->getClient()->getDocument($varioID);
-
                 // Aktualizace vario ids
                 if (empty($document->ID)) {
                     $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'orders` SET id_vario = \'' . $varioID . '\' WHERE id_order = ' . $order->id . ';';
                     Db::getInstance()->execute($sqlInsert);
                 }
 
+                $documentFromVario = $this->getClient()->getDocument($varioID);
                 $loadDocumentItemsFromVario = $documentFromVario->DocumentItems;
                 if (is_array($loadDocumentItemsFromVario))
                 /** @var TDocumentItem $documentItem */
