@@ -18,27 +18,17 @@ class ImportProduct
     /** @var SoapMe $client */
     private $client = null;
 
-    /** @var int $csLanguage */
-    private $csLanguage = -1;
-
-    /** @var int $enLanguage */
-    private $enLanguage = -1;
-
     /** @var array $bugRecords */
     private $bugRecords = array();
 
     private $setJobDataCount = 0;
     private $setJobDataSkipCount = 0;
-    private $varioProductSkip = 0;
-    private $productImportedCount = 0;
-    private $combinationImportedCount = 0;
 
     public function __construct($wsdl, $hasSentOnVario = false)
     {
         $this->hasSentOnVario = $hasSentOnVario;
         $this->client = new SoapMe($wsdl);
 
-        $this->loadLanguages();
         $this->loadAttributes();
     }
 
@@ -58,30 +48,6 @@ class ImportProduct
         return $this->setJobDataSkipCount;
     }
 
-    /**
-     * @return int
-     */
-    public function getVarioProductSkip()
-    {
-        return $this->varioProductSkip;
-    }
-
-    /**
-     * @return int
-     */
-    public function getProductImportedCount()
-    {
-        return $this->productImportedCount;
-    }
-
-    /**
-     * @return int
-     */
-    public function getCombinationImportedCount()
-    {
-        return $this->combinationImportedCount;
-    }
-
     public function import_from_vario(){
         $this->bugRecords = array();
 
@@ -91,73 +57,25 @@ class ImportProduct
 
         $varioProducts = $this->convertInputOnAbstractObject($products);
 
-        /** @var VarioProduct $varioProduct */
-        foreach ($varioProducts as $varioProduct) {
-            if ($varioProduct->getMain() == null) {
-                array_push($this->bugRecords, 'CONVERT (MAIN MISSING): ' . trim($varioProduct->getCode()));
-            }
-        }
+        $varioProducts = $this->findAndConnectPrestaProducts($varioProducts);
 
         $this->saveToPresta($varioProducts);
 
         $result = '';
         foreach ($this->bugRecords as $bugRecord) {
-            if ($this->bugRecords[0] == $bugRecord){
+            if ($this->bugRecords[0] == $bugRecord) {
                 $result = $bugRecord;
-            }else {
+            } else {
                 $result .= "\r\n" . $bugRecord;
             }
-       }
+        }
         return $result;
-    }
-
-    private function generateSlug($input, $sexType = null){
-        $input = $input . ' ' . $sexType;
-        $input = Helper::remove_accents($input);
-        $output = trim($input);
-
-        $output = str_replace(' ', '-', $output);
-        $output = str_replace('.', '', $output);
-        $output = str_replace(',', '', $output);
-        $output = str_replace('´', '', $output);
-        $output = str_replace('\'', '', $output);
-        $output = str_replace('&', 'AND', $output);
-
-        $output = strtolower($output);
-
-        return $output;
     }
 
     private function SendJobsComplete($skip_data)
     {
         if ($this->hasSentOnVario){
             $this->client->setJobs($skip_data);
-        }
-    }
-
-    private function loadLanguages()
-    {
-        $languages = Language::getLanguages();
-
-        foreach ($languages as $language) {
-            $isoCode = $language['iso_code'];
-            switch ($isoCode){
-                case 'en':
-                case 'gb':
-                    $this->enLanguage = $language['id_lang'];
-                    break;
-                case 'cs':
-                    $this->csLanguage = $language['id_lang'];
-                    break;
-            }
-        }
-
-        if ($this->enLanguage == -1){
-            throw new Exception('Nenalezen anglicky jazyk');
-        }
-
-        if ($this->csLanguage == -1){
-            throw new Exception('Nenalezen cesky jazyk');
         }
     }
 
@@ -179,7 +97,7 @@ class ImportProduct
         $SIZE_NAME_CS = 'Velikost';
         $COLOR_NAME_CS = 'Barva';
 
-        $attributes = Attribute::getAttributes($this->csLanguage);
+        $attributes = Attribute::getAttributes(Helper::getCsLanguage());
 
         foreach ($attributes as $attribute) {
             $type = $attribute['attribute_group'];
@@ -204,7 +122,6 @@ class ImportProduct
      */
     private function convertInputOnAbstractObject($products)
     {
-        $skip_data = array();
         // Abstrakce nad vario produktem
         $varioProducts = array();
         foreach ($products as $product) {
@@ -215,7 +132,6 @@ class ImportProduct
                     if ($product->Data == null){
                         array_push($this->bugRecords, 'CONVERT (SKIP): ' . trim($product->Job->ObjectID) . ', ' . $product->Job->Action);
                     }else {
-                        //array_push($skip_data, $product->Job->ID);
                         array_push($this->bugRecords, 'CONVERT (SKIP): ' . $product->Data->Book . ', ' . trim($product->Data->ProductName));
                     }
                     continue;
@@ -225,8 +141,9 @@ class ImportProduct
                 /** @var VarioProduct $item */
                 foreach ($varioProducts as $item) {
                     $uniCode = $item->getUniqueFromCode($product);
+                    $action = $item->getAction();
 
-                    if ($uniCode == $item->getCode()) {
+                    if ($uniCode == $item->getCode() AND $action == $product->Job->Action) {
                         if ($varioProduct == null) {
                             $varioProduct = $item;
                         } else {
@@ -247,107 +164,37 @@ class ImportProduct
             }
         }
 
-        //Odeslat spatna data jako zpracovana
-        $this->SendJobsComplete($skip_data);
-
         return $varioProducts;
     }
 
     private function saveToPresta($varioProducts)
     {
-        $prestaProducts = Product::getProducts($this->csLanguage, 0, 0, 'id_product', 'DESC');
-
         /** @var VarioProduct $varioProduct */
         foreach ($varioProducts as $varioProduct) {
-            $complete_vario_ids = array();
-
             try {
-                /** @var Product $product */
-                $product = $this->tryFindExistProduct($varioProduct, $prestaProducts);
-
-                // Pokud neni hlavni produkt a produkt neni v databazi, nebo je poslana spatna struktura dat, tak jdu dal
-                if ($varioProduct->getMain() == null){
-                    if (!$varioProduct->isStructuralAlright() OR $product == null){
-                        $this->varioProductSkip++;
-                        array_push($this->bugRecords, 'IMPORT (SKIP): ' . $varioProduct->getCode());
-                        continue;
-                    }
-                }
-
-                // kontrala jestli produkt uz neexistuje
-                if ($product == null) {
-                    $product = $this->createAndFillProduct($varioProduct);
-                    $product->save();
-                    $this->productImportedCount++;
-                }
-
-                // Aktualizace vario ID
-                $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'product` SET id_vario = \'' . $varioProduct->getVarioId() . '\' WHERE id_product = ' . $product->id . ';';
-                Db::getInstance()->execute($sqlInsert);
-
-                // Hodit hlavni product jako zpracovany
-                array_push($complete_vario_ids, $varioProduct->getJobId());
-
-                // Tvorba kombinaci
-                /** @var VarioVariant $varioVariant */
-                foreach ($varioProduct->getVariants() as $varioVariant) {
-
-                    $combinationId = CombinationCore::getIdByReference($product->id, $varioVariant->getCode());
-
-                    if ($combinationId == null){
-                        //tvorba nove kombinace
-                        $color = Helper::transferColor($varioVariant->getColor());
-                        $size = $varioVariant->getSize();
-                        $sex = Helper::transferCut($varioVariant->getSex());
-
-                        $colorAttribute = Helper::getAttribute($color, $this->colorAttributes);
-                        $sizeAttribute = Helper::getAttribute($size, $this->sizeAttributes);
-                        $sexAttribute = Helper::getAttribute($sex, $this->cutAttributes);
-
-                        if ($colorAttribute == null OR $sizeAttribute == null OR $sexAttribute == null){
-                            array_push($this->bugRecords, 'IMPORT VARIANT: ' . $varioProduct->getName() . ': '. $varioVariant->getCode() .
-                                ': colorAttribute = ' . $color . ', sizeAttribute = ' . $size . ', sexAttribute = ' . $sex .
-                                '!!! colorAttribute = ' . ($color !== null) . ', sizeAttribute = ' . ($size !== null) . ', sexAttribute = ' . ($sex !== null) );
+                switch ($varioProduct->getAction()) {
+                    case 'acInsert':
+                    case 'acUpdate':
+                        // Pokud neni hlavni produkt a produkt neni v databazi, nebo je poslana spatna struktura dat, tak jdu dal
+                        if ($varioProduct->isReadyToSaveOrUpdate()) {
+                            array_push($this->bugRecords, 'IMPORT (SKIP - Neni hlavni product ani nebyl nalezen produkt v prestashop): ' . $varioProduct->getCode());
                             continue;
                         }
 
-                        $colorId = $colorAttribute['id_attribute'];
-                        $sizeId = $sizeAttribute['id_attribute'];
-                        $sexId = $sexAttribute['id_attribute'];
+                        // Zpracovani produktu
+                        $varioProduct->createOrUpdate();
 
-                        $idCom = $product->addCombinationEntity(
-                            $varioVariant->getPrice(), 0, 0, 'unic_impact', 'ecotax', 1, null, $varioVariant->getCode(), null, null, null);
+                        // Zpracovani varianty
+                        $varioProduct->createOrUpdateVariant($this->colorAttributes, $this->sizeAttributes, $this->cutAttributes);
 
-                        $combination = new Combination((int)$idCom);
-                        $combination->setAttributes(array($sizeId, $colorId, $sexId));
-
-                        $combinationId = CombinationCore::getIdByReference($product->id, $varioVariant->getCode());
-
-                        // Aktualizace vario ID
-                        $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'product_attribute` SET id_vario = \'' . $varioVariant->getVarioId() . '\' WHERE id_product_attribute = ' . $combinationId . ';';
-                        Db::getInstance()->execute($sqlInsert);
-
-                        $this->combinationImportedCount++;
-
-                    }else{
-                        $sqlVario = 'SELECT id_vario FROM `' . _DB_PREFIX_ . 'product_attribute` WHERE id_product_attribute = ' . $combinationId;
-                        $varioID = Db::getInstance()->executeS($sqlVario);
-                        $varioID = $varioID[0]['id_vario'];
-
-                        if ($varioID !== $varioVariant->getVarioId()) {
-                            $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'product_attribute` SET id_vario = \'' . $varioVariant->getVarioId() . '\' WHERE id_product_attribute = ' . $combinationId . ';';
-                            Db::getInstance()->execute($sqlInsert);
-                        }
-
-                        $breakpoint = null;
-                    }
-
-                    array_push($complete_vario_ids, $varioVariant->getJobId());
+                        $this->SendJobsComplete($varioProduct->getSuccesJobIDs());
+                        break;
+                    case 'acDelete':
+                        $varioProduct->delete();
+                        break;
                 }
-
-                $this->SendJobsComplete($complete_vario_ids);
             }catch (Exception $exception){
-                array_push($this->bugRecords, 'IMPORT: ' . $varioProduct->getName() . ': ' . $exception->getMessage());
+                array_push($this->bugRecords, 'IMPORT: ' . $varioProduct->getCode() . $varioProduct->getName() . ': ' . $exception->getMessage());
             }
         }
     }
@@ -382,19 +229,40 @@ class ImportProduct
     }
 
     /**
-     * @param $varioProduct VarioProduct
-     * @return Product
+     * @param $prestaProduct Product
+     * @param $varioVariant VarioVariant
+     * @return int
      */
-    private function createAndFillProduct($varioProduct)
+    private function tryFindExistVariant($prestaProduct, $varioVariant)
     {
-        $product = new Product();
+        $combinationId = CombinationCore::getIdByReference($prestaProduct->id, $varioVariant->getCode());
 
-        $product->name = [$this->csLanguage => $varioProduct->getName()];
-        $product->reference = $varioProduct->getCode();
-        $product->link_rewrite = [$this->csLanguage => $this->generateSlug($varioProduct->getCode())];
+        return $combinationId;
+    }
 
-        $product->active = false;
+    private function findAndConnectPrestaProducts($varioProducts){
+        $prestaProducts = Product::getProducts(Helper::getCsLanguage(), 0, 0, 'id_product', 'DESC');
+        /** @var VarioProduct $varioProduct */
+        foreach ($varioProducts as $varioProduct) {
+            $prestaProduct = $this->tryFindExistProduct($varioProduct, $prestaProducts);
+            if ($prestaProduct !== null) {
+                $varioProduct->setPrestaProduct($prestaProduct);
 
-        return $product;
+                /** @var VarioVariant $varioVariant */
+                foreach ($varioProduct->getVariants() as $varioVariant) {
+                    $combinationId = $this->tryFindExistVariant($prestaProduct, $varioVariant);
+
+                    if ($combinationId !== null){
+                        $varioVariant->setCombinationId($combinationId);
+                    }
+                }
+            }
+
+            if ($varioProduct->getMain() == null) {
+                array_push($this->bugRecords, 'CONVERT (MAIN MISSING): ' . trim($varioProduct->getCode()));
+            }
+        }
+
+        return $varioProducts;
     }
 }

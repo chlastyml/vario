@@ -179,4 +179,44 @@ class Helper
         );
         return $tab[$cut_from_vario];
     }
+
+    public static function getCsLanguage(){
+        $languages = Language::getLanguages();
+
+        foreach ($languages as $language) {
+            $isoCode = $language['iso_code'];
+            if ($isoCode == 'cs'){
+                return $language['id_lang'];
+            }
+        }
+
+        throw new Exception('Nenalezena cestina');
+    }
+
+    public static function getEnLanguage(){
+        $languages = Language::getLanguages();
+
+        foreach ($languages as $language) {
+            $isoCode = $language['iso_code'];
+            if ($isoCode == 'en' OR $isoCode == 'gb'){
+                return $language['id_lang'];
+            }
+        }
+
+        throw new Exception('Nenalezena anglictina');
+    }
+
+    public static function generateSlug($input, $sexType = null){
+        $input = $input . ' ' . $sexType;
+        $input = self::remove_accents($input);
+        $output = trim($input);
+        $output = str_replace(' ', '-', $output);
+        $output = str_replace('.', '', $output);
+        $output = str_replace(',', '', $output);
+        $output = str_replace('´', '', $output);
+        $output = str_replace('\'', '', $output);
+        $output = str_replace('&', 'AND', $output);
+        $output = strtolower($output);
+        return $output;
+    }
 }

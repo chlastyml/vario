@@ -69,8 +69,6 @@ class VarioHelper extends ParentSetting
 
         $this->log("Import produktu z varia dokoncen." .
                         "\n\rCelkovy pocet setJobData " . $import->getSetJobDataCount() . " a preskoceno " . $import->getSetJobDataSkipCount() . " zaznamu" .
-                        "\n\rNebyl poslan hlavni produkt a ani nebyl nalezen v prestashopu: " . $import->getVarioProductSkip() .
-                        "\n\rImportovano " . $import->getProductImportedCount() . " produktu a " . $import->getCombinationImportedCount() . " variant" .
                         "\n\rWSDL: " . $wsdlUrl);
 
         return $result;
@@ -111,11 +109,26 @@ class VarioHelper extends ParentSetting
 
                 $varioID = $this->getClient()->createOrUpdateDocument($stdClass);
 
-                // TODO nepotrebne
-                $document = $this->getClient()->getDocument($varioID);
+                // TODO nepotrebne, jen pro kontrolu DEBUG
+                $documentFromVario = $this->getClient()->getDocument($varioID);
 
-                $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'orders` SET id_vario = \'' . $varioID . '\' WHERE id_order = ' . $order->id . ';';
-                Db::getInstance()->execute($sqlInsert);
+                // Aktualizace vario ids
+                if (empty($document->ID)) {
+                    $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'orders` SET id_vario = \'' . $varioID . '\' WHERE id_order = ' . $order->id . ';';
+                    Db::getInstance()->execute($sqlInsert);
+                }
+
+                $loadDocumentItemsFromVario = $documentFromVario->DocumentItems;
+                if (is_array($loadDocumentItemsFromVario))
+                /** @var TDocumentItem $documentItem */
+                foreach ($document->getDocumentItems() as $documentItem) {
+                    foreach ($loadDocumentItemsFromVario as $documentItemFromVario) {
+                        if ($documentItemFromVario->ExternID == $documentItem->ExternID AND empty($documentItem->ID)) {
+                            $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'order_detail` SET id_vario = \'' . $documentItemFromVario->ID . '\' WHERE id_order_detail = ' . $documentItem->ExternID . ';';
+                            Db::getInstance()->execute($sqlInsert);
+                        }
+                    }
+                }
 
                 // TODO: Zmenit stav objednavky?
 

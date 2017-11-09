@@ -75,14 +75,21 @@ class TDocument extends ObjectToArray
      */
     public function __construct($order)
     {
+        $this->DocumentItems = array();
+
         $customer = new Customer($order->id_customer);
         $currency = new Currency($order->id_currency);
 
         $deliveryAddress = new Address($order->id_address_delivery);
         $invoiceAddress = new Address($order->id_address_invoice);
 
+
+        $sqlTax_id = 'SELECT o.id_vario FROM ' . _DB_PREFIX_ . 'orders o
+                    WHERE o.id_order = ' . $order->id;
+        $vario_id_document = Db::getInstance()->getRow($sqlTax_id)['id_vario'];
+
         // (Doklady.rowguid) ID dokladu, pokud se nepošle při založení, doplní se, při aktualizaci povinné
-        $this->ID = '';
+        $this->ID = $vario_id_document;
         // (Doklady.Cislo_dokladu) číslo dokladu, pokud se nepošle při zápisu, doplní se podle číselné řady
         $this->Number = '';
         // (Doklady.Kniha) kniha, pokud se nepošle při zápisu, doplní se výchozí
@@ -109,6 +116,7 @@ class TDocument extends ObjectToArray
         $this->TaxDate = null;
         // (Doklady.Datum_splatnosti) datum splatnosti
         $this->SettlementDate = date('Y-m-d\TH:i:s.vP', strtotime($order->date_add)); // TODO je to spravne?
+        $this->SettlementDate = null;
         // (Doklady.Zpusob_uhrady) způsob úhrady
         $this->SettlementMethod = $order->payment;
         // (Doklady.PV) směr toku peněz (+1 faktura, pokladní příjmový doklad, výdejka, …, 0 stornovaný doklad, -1 dobropis, pokladní výdajový doklad, vratka výdejky, …)
@@ -207,7 +215,7 @@ class TDocument extends ObjectToArray
         $documentOrderNumber = 1;
         // TDocumentItems
         foreach ($order->getOrderDetailList() as $orderDetail) {
-            $this->addDocumentItem(new TDocumentItem($orderDetail, $documentOrderNumber, $tax_rate));
+            $this->addDocumentItem(new TDocumentItem($orderDetail, $documentOrderNumber, $tax_rate, $vario_id_document));
             $documentOrderNumber++;
         }
     }
@@ -230,5 +238,13 @@ class TDocument extends ObjectToArray
             $this->Addresses = array();
         }
         array_push($this->Addresses, $address);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDocumentItems()
+    {
+        return $this->DocumentItems;
     }
 }

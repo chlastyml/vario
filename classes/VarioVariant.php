@@ -18,6 +18,9 @@ class VarioVariant
     private $code_id = '';
     private $vario_id = '';
     private $job_id = '';
+    private $action = '';
+
+    private $combinationId;
 
     /**
      * VarioVariant constructor.
@@ -35,6 +38,7 @@ class VarioVariant
         $this->size = self::getSizeFromCode($code);
         $this->price = $variant->Data->Price;
         $this->code_id = self::getUniqueFromCode($this->code);
+        $this->action = $variant->Job->Action;
     }
 
     /**
@@ -115,6 +119,22 @@ class VarioVariant
     public function getJobId()
     {
         return $this->job_id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCombinationId()
+    {
+        return $this->combinationId;
+    }
+
+    /**
+     * @param mixed $combinationId
+     */
+    public function setCombinationId($combinationId)
+    {
+        $this->combinationId = $combinationId;
     }
 
     public static function getUniqueFromCode($code){

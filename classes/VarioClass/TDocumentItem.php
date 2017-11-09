@@ -43,17 +43,20 @@ class TDocumentItem extends ObjectToArray
     public $Number2;
     public $ExternID;
 
-    public function __construct($orderDetail, $documentOrderNumber, $tax_rate){
+    public function __construct($orderDetail, $documentOrderNumber, $tax_rate, $vario_id_document){
         $sqlGetProdcutVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "product WHERE id_product = " . $orderDetail['product_id'];
         $varioID_product = Db::getInstance()->getRow($sqlGetProdcutVarioID)['id_vario'];
 
         $sqlGetItemVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "product_attribute WHERE id_product_attribute = " . $orderDetail['product_attribute_id'];
         $varioID_item = Db::getInstance()->getRow($sqlGetItemVarioID)['id_vario'];
 
+        $sqlGetDocumentItemVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "order_detail WHERE id_order_detail = " . $orderDetail['id_order_detail'];
+        $vario_id_document_item = Db::getInstance()->getRow($sqlGetDocumentItemVarioID)['id_vario'];
+
         // (Polozky_dokladu.rowguid) ID položky dokladu, pokud se nepošle při založení, doplní se, při aktualizaci povinné
-        $this->ID = '';
+        $this->ID = $vario_id_document_item;
         // (Doklady.rowguid) ID dokladu, pokud se položka zapisuje samostatně, nutno vyplnit
-        $this->DocumentID = '';
+        $this->DocumentID = $vario_id_document;
         // (Polozky_dokladu.Polozka_dokladu) číslo (pořadí) položky, v rámci dokladu musí být unikátní
         $this->DocumentOrderNumber = $documentOrderNumber; // TODO nemusi
         // (Polozky_dokladu.Popis) popis

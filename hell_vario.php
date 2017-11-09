@@ -21,7 +21,7 @@ class Hell_Vario extends Module
     {
         $this->name = 'hell_vario';
         $this->tab = 'export';
-        $this->version = '0.8.5.1';
+        $this->version = '0.8.8.1';
         $this->author = 'Hellit';
         $this->controllers = array('vario');
         $this->need_instance = 1;
@@ -50,6 +50,7 @@ class Hell_Vario extends Module
             !$this->registerHook('header') ||
             !Configuration::updateValue('vario', 'my friend') ||
             !$this->registerHook( 'actionOrderStatusUpdate' ) ||
+            !$this->registerHook( 'actionOrderEdited' ) ||
             !$this->registerHook( 'displayPDFInvoice' ) ||
             !$this->installModuleTab()
         ) {
@@ -59,6 +60,7 @@ class Hell_Vario extends Module
         $sqlPA = 'ALTER TABLE ' . _DB_PREFIX_ . 'product_attribute ADD `id_vario` VARCHAR(255)';
         $sqlO = 'ALTER TABLE ' . _DB_PREFIX_ . 'orders ADD `id_vario` VARCHAR(255)';
         $sqlP = 'ALTER TABLE ' . _DB_PREFIX_ . 'product ADD `id_vario` VARCHAR(255)';
+        $sqlOD = 'ALTER TABLE ' . _DB_PREFIX_ . 'order_detail ADD `id_vario` VARCHAR(255)';
         $db = Db::getInstance();
         try {
             $db->Execute( $sqlPA);
@@ -72,6 +74,11 @@ class Hell_Vario extends Module
         }
         try {
             $db->Execute( $sqlP);
+        }catch (Exception $exception){
+            $e = $exception;
+        }
+        try {
+            $db->Execute( $sqlOD);
         }catch (Exception $exception){
             $e = $exception;
         }
@@ -118,6 +125,14 @@ class Hell_Vario extends Module
     }
 
     public function hookActionOrderStatusUpdate( $params ){
+        $newOrderStatus = $params['newOrderStatus'];
+        $statusId = $newOrderStatus->id;
+
+        $helper = new VarioHelper();
+        $helper->export_order($params['id_order'], $statusId);
+    }
+
+    public function hookActionOrderEdited( $params ){
         $newOrderStatus = $params['newOrderStatus'];
         $statusId = $newOrderStatus->id;
 
