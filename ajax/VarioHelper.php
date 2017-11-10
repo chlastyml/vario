@@ -176,18 +176,22 @@ class VarioHelper extends ParentSetting
             //TODO get invoice pdf url
             $invoice_pdf_url = 'http://www.axmag.com/download/pdfurl-guide.pdf';
 
-            $local_pdf = fopen( dirname( __FILE__ ) . '../invoices/' . $order->reference . '.pdf', 'w+' );
-            $curl = curl_init( $invoice_pdf_url );
-            //curl_setopt( $curl, CURLOPT_REFERER, 'https://www.sedi.ca/sedi/SVTWeeklySummaryACL?name=W1ALLPDFI&locale=en_CA');
-            curl_setopt( $curl, CURLOPT_TIMEOUT, 60 );
-            curl_setopt( $curl, CURLOPT_REFERER, $local_pdf );
-            curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, 1 );
-            curl_setopt( $curl, CURLOPT_ENCODING, "" );
-            curl_exec( $curl );
-            curl_close( $curl );
-            fclose( $local_pdf );
+            $path = dirname( __FILE__ ) . '/../invoices/' . $order->reference . '.pdf';
+            $ch = curl_init($invoice_pdf_url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_REFERER, $invoice_pdf_url);
 
-            log('Download invoice: Dokonceno pro objednavku ID: ' . $orderId . ', Reference: ' . $order->reference);
+            $data = curl_exec($ch);
+
+            curl_close($ch);
+
+            $result = file_put_contents($path, $data);
+
+            if(!$result){
+                log('Download invoice: Chyba pro stahovani PDF');
+            }else{
+                log('Download invoice: Dokonceno pro objednavku ID: ' . $orderId . ', Reference: ' . $order->reference);
+            }
         }
     }
 
