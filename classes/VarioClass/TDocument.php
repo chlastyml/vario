@@ -84,9 +84,8 @@ class TDocument extends ObjectToArray
         $invoiceAddress = new Address($order->id_address_invoice);
 
 
-        $sqlTax_id = 'SELECT o.id_vario FROM ' . _DB_PREFIX_ . 'orders o
-                    WHERE o.id_order = ' . $order->id;
-        $vario_id_document = Db::getInstance()->getRow($sqlTax_id)['id_vario'];
+        $sql_id_vario_order = 'SELECT o.id_vario FROM ' . _DB_PREFIX_ . 'orders o WHERE o.id_order = ' . $order->id;
+        $vario_id_document = Db::getInstance()->getRow($sql_id_vario_order)['id_vario'];
 
         // (Doklady.rowguid) ID dokladu, pokud se nepošle při založení, doplní se, při aktualizaci povinné
         $this->ID = $vario_id_document;
@@ -205,12 +204,12 @@ class TDocument extends ObjectToArray
         $this->addAddress(new TAddress($deliveryAddress));
         $this->addAddress(new TAddress($invoiceAddress));
 
-        $sqlTax_id = 'SELECT pt.rate FROM ' . _DB_PREFIX_ . 'tax pt
+        $sql_id_vario_order = 'SELECT pt.rate FROM ' . _DB_PREFIX_ . 'tax pt
                     LEFT JOIN ' . _DB_PREFIX_ . 'order_invoice_tax poit ON poit.id_tax=pt.id_tax
                     LEFT JOIN ' . _DB_PREFIX_ . 'order_invoice poi ON poi.id_order_invoice=poit.id_order_invoice
                     LEFT JOIN ' . _DB_PREFIX_ . 'orders po ON po.id_order=poi.id_order
                     WHERE po.id_order = ' . $order->id;
-        $tax_rate = Db::getInstance()->getRow($sqlTax_id)['rate'];
+        $tax_rate = Db::getInstance()->getRow($sql_id_vario_order)['rate'];
 
         $documentOrderNumber = 1;
         // TDocumentItems

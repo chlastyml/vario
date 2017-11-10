@@ -215,6 +215,7 @@ class Helper
         $output = str_replace(',', '', $output);
         $output = str_replace('´', '', $output);
         $output = str_replace('\'', '', $output);
+        $output = str_replace('~', '', $output);
         $output = str_replace('&', 'AND', $output);
         $output = strtolower($output);
         return $output;

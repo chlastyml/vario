@@ -6,8 +6,8 @@
  * Time: 12:03
  */
 
-include_once dirname(__FILE__).'/VarioVariant.php';
-include_once dirname(__FILE__).'/Helper.php';
+include_once dirname(__FILE__) . '/VarioVariant.php';
+include_once dirname(__FILE__) . '../Helper.php';
 
 class VarioProduct
 {
@@ -76,7 +76,8 @@ class VarioProduct
 
     public function isReadyToSaveOrUpdate()
     {
-        return $this->getMain() == null AND $this->getPrestaProduct() == null;
+        // Ready je ve chvili kdy bud ma hlavni produkt nebo ma obraz v prestashopu
+        return $this->getMain() !== null OR $this->getPrestaProduct() !== null;
     }
 
     private $succesJobIDs = array();
@@ -95,12 +96,23 @@ class VarioProduct
             $this->setPrestaProduct($product);
             $this->getPrestaProduct()->save();
         }else{ // Aktualizujeme
-            // TODO
+            $product = $this->getPrestaProduct();
+
+            $product->name = [Helper::getCsLanguage() => $this->getName()];
+
+            // TODO co vse aktualizovat?
+
+            $product->update();
         }
 
-        // Aktualizace vario ID
-        $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'product` SET id_vario = \'' . $this->getVarioId() . '\' WHERE id_product = ' . $this->getPrestaProduct()->id . ';';
-        Db::getInstance()->execute($sqlInsert);
+        $sqlGetProdcutVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "product WHERE id_product = " . $product->id;
+        $varioID_product = Db::getInstance()->getRow($sqlGetProdcutVarioID)['id_vario'];
+
+        if ($varioID_product !== $this->getVarioId()) {
+            // Aktualizace vario ID
+            $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'product` SET id_vario = \'' . $this->getVarioId() . '\' WHERE id_product = ' . $this->getPrestaProduct()->id . ';';
+            Db::getInstance()->execute($sqlInsert);
+        }
 
         array_push($this->succesJobIDs, $this->getJobId());
     }
@@ -161,10 +173,8 @@ class VarioProduct
     public function delete(){
         $prestaProduct = $this->getPrestaProduct();
         if ($prestaProduct !== null){
-            //$prestaProduct->active = false;
-            $prestaProduct->update(array(
-                'active' => false
-            ));
+            $prestaProduct->active = false;
+            $prestaProduct->update();
         }
     }
 

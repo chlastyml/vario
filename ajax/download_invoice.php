@@ -23,8 +23,8 @@ if(Tools::getIsset('token') && Tools::getIsset('action'))
         $order = new Order($orderId);
         $statusId = $order->current_state;
 
-        $varioHelper->export_order($orderId, $order->current_state);
+        $varioHelper->download_invoice($orderId, $order->current_state);
     }
 
-    echo 'download_invoice Complete';
+    echo 'Export Complete';
 }

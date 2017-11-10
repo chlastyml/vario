@@ -31,6 +31,12 @@
                 <i class="icon-usd"></i>&nbsp;{l s='EXPORT ORDER' mod='vario'}
             </button>
         </div>
+        <div class="col-lg-1">
+            <br>
+            <button type="button" class="btn btn-default" name="download_invoice" id="download_invoice">
+                <i class="icon-usd"></i>&nbsp;{l s='DOWNLOAD INVOICE' mod='vario'}
+            </button>
+        </div>
         <div class="clearfix">
             <div id="tag-id"></div>
         </div>

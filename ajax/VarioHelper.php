@@ -58,20 +58,25 @@ class VarioHelper extends ParentSetting
 
     public function import_product()
     {
-        $wsdlUrl = $this->getWsdlUrl();
+        try {
+            $wsdlUrl = $this->getWsdlUrl();
 
-        $import = new ImportProduct($wsdlUrl);
-        $result = $import->import_from_vario();
+            $import = new ImportProduct($wsdlUrl);
+            $result = $import->import_from_vario();
 
-        if ($result !== '') {
-            $this->logTime($result);
+            if ($result !== '') {
+                $this->logTime($result);
+            }
+
+            $this->log("Import produktu z varia dokoncen." .
+                "\n\rCelkovy pocet setJobData " . $import->getSetJobDataCount() . " a preskoceno " . $import->getSetJobDataSkipCount() . " zaznamu" .
+                "\n\rWSDL: " . $wsdlUrl);
+
+            return $result;
+        }catch (Exception $exception){
+            $this->log("Import produktu z varia. Kriticka chyba!\n\r " . $exception->getMessage());
+            return "ERROR :" . $exception->getMessage();
         }
-
-        $this->log("Import produktu z varia dokoncen." .
-                        "\n\rCelkovy pocet setJobData " . $import->getSetJobDataCount() . " a preskoceno " . $import->getSetJobDataSkipCount() . " zaznamu" .
-                        "\n\rWSDL: " . $wsdlUrl);
-
-        return $result;
     }
 
     /**
@@ -137,8 +142,53 @@ class VarioHelper extends ParentSetting
         }
     }
 
-    public function load_order_invoice(){
+    public function download_invoice($orderId, $statusId)
+    {
+        /*
+         * ID Nazev                                         template
+         ****************************************************************
+         * 1  Čeká se na platbu šekem                       cheque
+         * 2  Platba byla přijata                           payment
+         * 3  Probíhá příprava                              preparation
+         * 4  Odeslána                                      shipped
+         * 5  Dodáno
+         * 6  Zrušeno                                       order_canceled
+         * 7  Splaceno                                      refund
+         * 8  Chyba platby                                  payment_error
+         * 9  U dodavatele (zaplaceno)                      outofstock
+         * 10 Čeká se na přijetí bezhotovostní platby       bankwire
+         * 11 Bezhotostní platba přijata                    payment
+         * 12 U dodavatele (nezaplaceno)                    outofstock
+         */
 
+        if ($statusId == 4) {
+            $order = new Order($orderId);
+
+            $vario_id = Db::getInstance()->getRow('SELECT o.id_vario FROM ' . _DB_PREFIX_ . 'orders o WHERE o.id_order = ' . $order->id)['id_vario'];
+
+            if (!$vario_id){
+                log('Download invoice: Nenalezeno vario ID objednavky');
+                return;
+            }
+
+            $this->getClient()->getDocument($vario_id);
+
+            //TODO get invoice pdf url
+            $invoice_pdf_url = 'http://www.axmag.com/download/pdfurl-guide.pdf';
+
+            $local_pdf = fopen( dirname( __FILE__ ) . '../invoices/' . $order->reference . '.pdf', 'w+' );
+            $curl = curl_init( $invoice_pdf_url );
+            //curl_setopt( $curl, CURLOPT_REFERER, 'https://www.sedi.ca/sedi/SVTWeeklySummaryACL?name=W1ALLPDFI&locale=en_CA');
+            curl_setopt( $curl, CURLOPT_TIMEOUT, 60 );
+            curl_setopt( $curl, CURLOPT_REFERER, $local_pdf );
+            curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, 1 );
+            curl_setopt( $curl, CURLOPT_ENCODING, "" );
+            curl_exec( $curl );
+            curl_close( $curl );
+            fclose( $local_pdf );
+
+            log('Download invoice: Dokonceno pro objednavku ID: ' . $orderId . ', Reference: ' . $order->reference);
+        }
     }
 
     public function getWsdlUrl(){

@@ -10,10 +10,9 @@ if (!defined('_PS_VERSION_')){
     exit;
 }
 
-include_once dirname(__FILE__).'/classes/SoapMe.php';
-include_once dirname(__FILE__).'/classes/Helper.php';
-include_once dirname(__FILE__).'/classes/VarioProduct.php';
-include_once dirname(__FILE__).'/ajax/VarioHelper.php';
+include_once dirname(__FILE__) . '/classes/SoapMe.php';
+include_once dirname(__FILE__) . '/classes/Helper.php';
+include_once dirname(__FILE__) . '/ajax/VarioHelper.php';
 
 class Hell_Vario extends Module
 {
@@ -21,7 +20,7 @@ class Hell_Vario extends Module
     {
         $this->name = 'hell_vario';
         $this->tab = 'export';
-        $this->version = '0.8.8.8';
+        $this->version = '0.8.8.9';
         $this->author = 'Hellit';
         $this->controllers = array('vario');
         $this->need_instance = 1;
@@ -124,12 +123,41 @@ class Hell_Vario extends Module
         return true;
     }
 
-    public function hookActionOrderStatusUpdate( $params ){
+    public function hookActionOrderStatusUpdate( $params )
+    {
         $newOrderStatus = $params['newOrderStatus'];
         $statusId = $newOrderStatus->id;
 
+        /*
+         * ID Nazev                                         template
+         ****************************************************************
+         * 1  Čeká se na platbu šekem                       cheque
+         * 2  Platba byla přijata                           payment
+         * 3  Probíhá příprava                              preparation
+         * 4  Odeslána                                      shipped
+         * 5  Dodáno
+         * 6  Zrušeno                                       order_canceled
+         * 7  Splaceno                                      refund
+         * 8  Chyba platby                                  payment_error
+         * 9  U dodavatele (zaplaceno)                      outofstock
+         * 10 Čeká se na přijetí bezhotovostní platby       bankwire
+         * 11 Bezhotostní platba přijata                    payment
+         * 12 U dodavatele (nezaplaceno)                    outofstock
+         */
+
         $helper = new VarioHelper();
-        $helper->export_order($params['id_order'], $statusId);
+
+        switch ($statusId) {
+            case 2:
+            case 11:
+                // Poslani objednavky do varia
+                $helper->export_order($params['id_order'], $statusId);
+                break;
+            case 4:
+                // Stazeni faktury
+                $helper->download_invoice($params['id_order'], $statusId);
+                break;
+        }
     }
 
     public function hookActionOrderEdited( $params ){
@@ -144,7 +172,20 @@ class Hell_Vario extends Module
         $invoice = $params['object'];
         $order = new Order($invoice->id_order);
         if ($order->module == 'ps_wirepayment') {
-            header('Location: /modules/hell_vario/invoices/' . $order->reference . '.pdf');
+
+            $array = explode('/', $_SERVER['BASE']);
+            $str = '';
+            foreach ($array as $item) {
+                if ($item == $array[count($array) - 1]){
+                    break;
+                }
+                $str .= $item . '/';
+            }
+
+            $path = 'Location: ' . $str . 'modules/hell_vario/invoices/' . $order->reference . '.pdf';
+            header($path);
+
+            //header('Location: /modules/hell_vario/invoices/' . $order->reference . '.pdf');
         }
     }
 }

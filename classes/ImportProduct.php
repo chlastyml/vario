@@ -6,10 +6,10 @@
  * Time: 13:52
  */
 
-include_once dirname(__FILE__).'/SoapMe.php';
-include_once dirname(__FILE__).'/Helper.php';
-include_once dirname(__FILE__).'/VarioProduct.php';
-include_once dirname(__FILE__).'/VarioVariant.php';
+include_once dirname(__FILE__) . '/SoapMe.php';
+include_once dirname(__FILE__) . '/Helper.php';
+include_once dirname(__FILE__) . '/AbstractClass/VarioProduct.php';
+include_once dirname(__FILE__) . '/AbstractClass/VarioVariant.php';
 
 class ImportProduct
 {
@@ -175,8 +175,7 @@ class ImportProduct
                 switch ($varioProduct->getAction()) {
                     case 'acInsert':
                     case 'acUpdate':
-                        // Pokud neni hlavni produkt a produkt neni v databazi, nebo je poslana spatna struktura dat, tak jdu dal
-                        if ($varioProduct->isReadyToSaveOrUpdate()) {
+                        if (!$varioProduct->isReadyToSaveOrUpdate()) {
                             array_push($this->bugRecords, 'IMPORT (SKIP - Neni hlavni product ani nebyl nalezen produkt v prestashop): ' . $varioProduct->getCode());
                             continue;
                         }

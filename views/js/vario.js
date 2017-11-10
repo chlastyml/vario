@@ -126,6 +126,34 @@ $(document).ready(function(){
         });
     });
 
+    $('#download_invoice').click(function(){
+        if(lock)
+            return;
+        lock = true;
+        console.log('start: #download_invoice');
+        $.ajax({
+            url:"../modules/hell_vario/ajax/download_invoice.php",
+            data:{
+                ajax        : true,
+                action      : 'download_invoice',
+                token       : new Date().getTime()
+            },
+            method:'POST',
+            success:function(data){
+                document.getElementById('tag-id').innerHTML = data;
+                console.log("#download_invoice success. " + data);
+
+                resetElements('#download_invoice');
+                lock = false;
+            },
+            error:function (data) {
+                document.getElementById('tag-id').innerHTML = data;
+                console.log("#download_invoice error. " + data);
+                lock = false;
+            }
+        });
+    });
+
     var default_icon = document.getElementById('test_vario_icon').className;
     function resetElements(functionName) {
         setTimeout(function(){
