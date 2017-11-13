@@ -7,7 +7,7 @@
  */
 
 include_once dirname(__FILE__) . '/VarioVariant.php';
-include_once dirname(__FILE__) . '../Helper.php';
+include_once dirname(__FILE__) . '../Hell_Helper.php';
 
 class VarioProduct
 {
@@ -87,9 +87,9 @@ class VarioProduct
 
             $product = new Product();
 
-            $product->name = [Helper::getCsLanguage() => $this->getName()];
+            $product->name = [Hell_Helper::getCsLanguage() => $this->getName()];
             $product->reference = $this->getCode();
-            $product->link_rewrite = [Helper::getCsLanguage() => Helper::generateSlug($this->getCode())];
+            $product->link_rewrite = [Hell_Helper::getCsLanguage() => Hell_Helper::generateSlug($this->getCode())];
 
             $product->active = false;
 
@@ -98,7 +98,7 @@ class VarioProduct
         }else{ // Aktualizujeme
             $product = $this->getPrestaProduct();
 
-            $product->name = [Helper::getCsLanguage() => $this->getName()];
+            $product->name = [Hell_Helper::getCsLanguage() => $this->getName()];
 
             // TODO co vse aktualizovat?
 
@@ -125,13 +125,13 @@ class VarioProduct
 
             if ($combinationId == null){ // Tvorba kombinace
                 //tvorba nove kombinace
-                $color = Helper::transferColor($varioVariant->getColor());
+                $color = Hell_Helper::transferColor($varioVariant->getColor());
                 $size = $varioVariant->getSize();
-                $sex = Helper::transferCut($varioVariant->getSex());
+                $sex = Hell_Helper::transferCut($varioVariant->getSex());
 
-                $colorAttribute = Helper::getAttribute($color, $colorAttributes);
-                $sizeAttribute = Helper::getAttribute($size, $sizeAttributes);
-                $sexAttribute = Helper::getAttribute($sex, $cutAttributes);
+                $colorAttribute = Hell_Helper::getAttribute($color, $colorAttributes);
+                $sizeAttribute = Hell_Helper::getAttribute($size, $sizeAttributes);
+                $sexAttribute = Hell_Helper::getAttribute($sex, $cutAttributes);
 
                 if ($colorAttribute == null OR $sizeAttribute == null OR $sexAttribute == null){
                     /*

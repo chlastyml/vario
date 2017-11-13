@@ -6,7 +6,7 @@
  * Time: 11:24
  */
 
-include_once dirname(__FILE__).'/Helper.php';
+include_once dirname(__FILE__).'/Hell_Helper.php';
 
 class SoapMe
 {
@@ -30,7 +30,7 @@ class SoapMe
     {
         ini_set('max_execution_time', 300);
 
-        if (Helper::IsNullOrEmptyString($wsdl))
+        if (empty($wsdl))
             throw new Exception('wsdl nemuze byt null nebo prazny retezec');
 
         $this->wsdl = $wsdl;
@@ -41,7 +41,7 @@ class SoapMe
     }
 
     public function refreshClient(){
-        if (!Helper::IsNullOrEmptyString($this->login) AND !Helper::IsNullOrEmptyString($this->password))
+        if (!empty($this->login) AND !empty($this->password))
             $this->client = new SoapClient($this->wsdl, array('login' => $this->login, 'password' => $this->password));
         else
             $this->client = new SoapClient($this->wsdl);

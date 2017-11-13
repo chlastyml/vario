@@ -6,7 +6,7 @@
  * Time: 11:07
  */
 
-class Helper
+class Hell_Helper
 {
     public static function IsNullOrEmptyString($question){
         return (!isset($question) || trim($question)==='');
@@ -219,5 +219,17 @@ class Helper
         $output = str_replace('&', 'AND', $output);
         $output = strtolower($output);
         return $output;
+    }
+
+    public static function removeLastItem($inputString, $delimiter){
+        $array = explode($delimiter, $inputString);
+        $str = '';
+        foreach ($array as $item) {
+            if ($item == $array[count($array) - 1]) {
+                break;
+            }
+            $str .= $item . '/';
+        }
+        return $str;
     }
 }

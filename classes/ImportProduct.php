@@ -7,7 +7,7 @@
  */
 
 include_once dirname(__FILE__) . '/SoapMe.php';
-include_once dirname(__FILE__) . '/Helper.php';
+include_once dirname(__FILE__) . '/Hell_Helper.php';
 include_once dirname(__FILE__) . '/AbstractClass/VarioProduct.php';
 include_once dirname(__FILE__) . '/AbstractClass/VarioVariant.php';
 
@@ -97,7 +97,7 @@ class ImportProduct
         $SIZE_NAME_CS = 'Velikost';
         $COLOR_NAME_CS = 'Barva';
 
-        $attributes = Attribute::getAttributes(Helper::getCsLanguage());
+        $attributes = Attribute::getAttributes(Hell_Helper::getCsLanguage());
 
         foreach ($attributes as $attribute) {
             $type = $attribute['attribute_group'];
@@ -240,7 +240,7 @@ class ImportProduct
     }
 
     private function findAndConnectPrestaProducts($varioProducts){
-        $prestaProducts = Product::getProducts(Helper::getCsLanguage(), 0, 0, 'id_product', 'DESC');
+        $prestaProducts = Product::getProducts(Hell_Helper::getCsLanguage(), 0, 0, 'id_product', 'DESC');
         /** @var VarioProduct $varioProduct */
         foreach ($varioProducts as $varioProduct) {
             $prestaProduct = $this->tryFindExistProduct($varioProduct, $prestaProducts);

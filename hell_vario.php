@@ -11,7 +11,7 @@ if (!defined('_PS_VERSION_')){
 }
 
 include_once dirname(__FILE__) . '/classes/SoapMe.php';
-include_once dirname(__FILE__) . '/classes/Helper.php';
+include_once dirname(__FILE__) . '/classes/Hell_Helper.php';
 include_once dirname(__FILE__) . '/ajax/VarioHelper.php';
 
 class Hell_Vario extends Module
@@ -169,21 +169,47 @@ class Hell_Vario extends Module
     }
 
     public function hookDisplayPDFInvoice( $params ){
+        /*
+         * ID Nazev                                         template
+         ****************************************************************
+         * 1  Čeká se na platbu šekem                       cheque
+         * 2  Platba byla přijata                           payment
+         * 3  Probíhá příprava                              preparation
+         * 4  Odeslána                                      shipped
+         * 5  Dodáno
+         * 6  Zrušeno                                       order_canceled
+         * 7  Splaceno                                      refund
+         * 8  Chyba platby                                  payment_error
+         * 9  U dodavatele (zaplaceno)                      outofstock
+         * 10 Čeká se na přijetí bezhotovostní platby       bankwire
+         * 11 Bezhotostní platba přijata                    payment
+         * 12 U dodavatele (nezaplaceno)                    outofstock
+         */
+
         $invoice = $params['object'];
         $order = new Order($invoice->id_order);
-        if ($order->module == 'ps_wirepayment') {
+        $statusId = $order->current_state;
 
-            $array = explode('/', $_SERVER['BASE']);
-            $str = '';
-            foreach ($array as $item) {
-                if ($item == $array[count($array) - 1]){
-                    break;
-                }
-                $str .= $item . '/';
-            }
+        $sqlGetProdcutVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "orders WHERE id_order = " . $invoice->id_order;
+        $varioID_order = Db::getInstance()->getRow($sqlGetProdcutVarioID)['id_vario'];
 
-            $path = 'Location: ' . $str . 'modules/hell_vario/invoices/' . $order->reference . '.pdf';
-            header($path);
+        $innerPath = 'hell_vario/invoices/' . $order->reference . '.pdf';
+        $path = Hell_Helper::removeLastItem(dirname(__FILE__), '\\') . $innerPath;
+
+        if ($statusId == 4 AND
+            $varioID_order AND
+            $order->module == 'ps_wirepayment' AND
+            file_exists($path))
+        {
+            $serverPath = Helper::removeLastItem($_SERVER['BASE'], '/');
+
+            /*
+            header('Content-Type: application/download');
+            header('Content-Disposition: attachment; filename="' . 'invoices/' . $order->reference . '.pdf' . '"');
+            header("Content-Length: " . filesize('invoices/' . $order->reference . '.pdf'));
+            */
+
+            header('Location: ' . $serverPath . 'modules/' . $innerPath);
 
             //header('Location: /modules/hell_vario/invoices/' . $order->reference . '.pdf');
         }
