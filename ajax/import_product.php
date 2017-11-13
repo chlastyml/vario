@@ -11,7 +11,7 @@ require_once('../classes/ImportProduct.php');
 if(Tools::getIsset('token') && Tools::getIsset('action'))
 {
     try {
-        $ajaxHelper = new VarioHelper(true);
+        $ajaxHelper = new VarioHelper();
 
         $result = $ajaxHelper->import_product();
 

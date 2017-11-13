@@ -6,7 +6,7 @@
  * Time: 11:07
  */
 
-class Hell_Helper
+class HellHelper
 {
     public static function IsNullOrEmptyString($question){
         return (!isset($question) || trim($question)==='');

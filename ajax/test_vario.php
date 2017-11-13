@@ -12,7 +12,7 @@ require_once('VarioHelper.php');
 
 if(Tools::getIsset('token') && Tools::getIsset('action'))
 {
-    $ajaxHelper = new VarioHelper(true);
+    $ajaxHelper = new VarioHelper();
     $ajaxHelper->getClient();
 
     echo null;

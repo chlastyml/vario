@@ -104,15 +104,16 @@ class VarioHelper extends ParentSetting
 
         if ($statusId == 2 OR $statusId == 11)
         {
-            $order = new Order($orderId);
-
-            // Convert na znamou entitu
-            $document = new TDocument($order);
-
             try {
+                $order = new Order($orderId);
+
+                // Convert na znamou entitu
+                $document = new TDocument($order);
+
                 $stdClass = $document->getStdClass();
 
-                $varioID = $this->getClient()->createOrUpdateDocument($stdClass);
+                $varioID = null;
+                //$varioID = $this->getClient()->createOrUpdateDocument($stdClass);
 
                 // Aktualizace vario ids
                 if (empty($document->ID)) {
@@ -216,4 +217,6 @@ class VarioHelper extends ParentSetting
 
         return $this->client;
     }
+
+
 }

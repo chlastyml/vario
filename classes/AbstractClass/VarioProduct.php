@@ -7,7 +7,7 @@
  */
 
 include_once dirname(__FILE__) . '/VarioVariant.php';
-include_once dirname(__FILE__) . '../Hell_Helper.php';
+include_once dirname(__FILE__) . '/../HellHelper.php';
 
 class VarioProduct
 {
@@ -87,9 +87,9 @@ class VarioProduct
 
             $product = new Product();
 
-            $product->name = [Hell_Helper::getCsLanguage() => $this->getName()];
+            $product->name = [HellHelper::getCsLanguage() => $this->getName()];
             $product->reference = $this->getCode();
-            $product->link_rewrite = [Hell_Helper::getCsLanguage() => Hell_Helper::generateSlug($this->getCode())];
+            $product->link_rewrite = [HellHelper::getCsLanguage() => HellHelper::generateSlug($this->getCode())];
 
             $product->active = false;
 
@@ -98,7 +98,7 @@ class VarioProduct
         }else{ // Aktualizujeme
             $product = $this->getPrestaProduct();
 
-            $product->name = [Hell_Helper::getCsLanguage() => $this->getName()];
+            $product->name = [HellHelper::getCsLanguage() => $this->getName()];
 
             // TODO co vse aktualizovat?
 
@@ -125,13 +125,13 @@ class VarioProduct
 
             if ($combinationId == null){ // Tvorba kombinace
                 //tvorba nove kombinace
-                $color = Hell_Helper::transferColor($varioVariant->getColor());
+                $color = HellHelper::transferColor($varioVariant->getColor());
                 $size = $varioVariant->getSize();
-                $sex = Hell_Helper::transferCut($varioVariant->getSex());
+                $sex = HellHelper::transferCut($varioVariant->getSex());
 
-                $colorAttribute = Hell_Helper::getAttribute($color, $colorAttributes);
-                $sizeAttribute = Hell_Helper::getAttribute($size, $sizeAttributes);
-                $sexAttribute = Hell_Helper::getAttribute($sex, $cutAttributes);
+                $colorAttribute = HellHelper::getAttribute($color, $colorAttributes);
+                $sizeAttribute = HellHelper::getAttribute($size, $sizeAttributes);
+                $sexAttribute = HellHelper::getAttribute($sex, $cutAttributes);
 
                 if ($colorAttribute == null OR $sizeAttribute == null OR $sexAttribute == null){
                     /*

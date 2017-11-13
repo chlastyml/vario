@@ -6,8 +6,6 @@
  * Time: 11:24
  */
 
-include_once dirname(__FILE__).'/Hell_Helper.php';
-
 class SoapMe
 {
     public $error = null;

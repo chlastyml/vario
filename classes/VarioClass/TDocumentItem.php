@@ -43,7 +43,20 @@ class TDocumentItem extends ObjectToArray
     public $Number2;
     public $ExternID;
 
-    public function __construct($orderDetail, $documentOrderNumber, $tax_rate, $vario_id_document){
+    public function __construct($object, $isOrderDetail){
+        if ($isOrderDetail){
+            $this->fillByOrderDetail($object);
+        }else{
+            $this->fillByCarrier($object);
+        }
+    }
+
+    private function fillByOrderDetail($object){
+        $orderDetail = $object->orderDetail;
+        $documentOrderNumber = $object->documentOrderNumber;
+        $tax_rate = $object->tax_rate;
+        $vario_id_document = $object->vario_id_document;
+
         $sqlGetProdcutVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "product WHERE id_product = " . $orderDetail['product_id'];
         $varioID_product = Db::getInstance()->getRow($sqlGetProdcutVarioID)['id_vario'];
 
@@ -118,5 +131,85 @@ class TDocumentItem extends ObjectToArray
         $this->Number2 = 0;
         // volné pole pro případnou identifikaci položky shopem
         $this->ExternID = $orderDetail['id_order_detail'];
+    }
+
+    private function fillByCarrier($object){
+        $carrier = $object->carrier;
+        $documentOrderNumber = $object->documentOrderNumber;
+        $vario_id_document = $object->vario_id_document;
+        $order = $object->order;
+
+        $sqlGetProdcutVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "carrier WHERE id_carrier = " . $carrier->id;
+        $vario_id_carrier = Db::getInstance()->getRow($sqlGetProdcutVarioID)['id_vario'];
+
+        $sqlOrderCarrier = "SELECT * FROM ". _DB_PREFIX_ . "order_carrier WHERE id_order = " . $order->id . " AND id_carrier = " . $carrier->id;
+        $orderCarrier = Db::getInstance()->getRow($sqlOrderCarrier);
+
+
+        // (Polozky_dokladu.rowguid) ID položky dokladu, pokud se nepošle při založení, doplní se, při aktualizaci povinné
+        $this->ID = '';
+        // (Doklady.rowguid) ID dokladu, pokud se položka zapisuje samostatně, nutno vyplnit
+        $this->DocumentID = $vario_id_document;
+        // (Polozky_dokladu.Polozka_dokladu) číslo (pořadí) položky, v rámci dokladu musí být unikátní
+        $this->DocumentOrderNumber = $documentOrderNumber; // TODO nemusi
+        // (Polozky_dokladu.Popis) popis
+        $this->Description = "";
+        // (Polozky_dokladu.Cislo) (katalogové) číslo
+        $this->ItemNumber = "";
+        // (Polozky_dokladu.Mnozstvi) množství
+        $this->Quantity = 1;
+        // (Polozky_dokladu.Jednotky) jednotka
+        $this->QuantityUnit = "Ks";
+        // (Polozky_dokladu.Cena_zakladni) základní cena
+        $this->GPL = null;
+        // (Polozky_dokladu.Cena_za_jednotku) cena za jednotku, při zápisu nutno vyplnit
+        $this->PricePerUnit = $orderCarrier['shipping_cost_tax_incl'];
+        // (Polozky_dokladu.Cena_bez_DPH) cena celkem bez DPH, při zápisu nutno vyplnit
+        $this->PriceWithoutVAT = $orderCarrier['shipping_cost_tax_excl'];
+        // (Polozky_dokladu.DPH_celkem) celkem DPH, při zápisu nutno vyplnit
+        $this->TotalVAT = $orderCarrier['shipping_cost_tax_incl'];
+        // (Polozky_dokladu.Cena_s_DPH) celková cena včetně DPH, při zápisu nutno vyplnit
+        $this->TotalPrice = $orderCarrier['shipping_cost_tax_excl'];
+
+        // (Polozky_dokladu.Sazba_DPH) sazba DPH, při zápisu nutno vyplnit
+        $this->VATRate = '';
+        // (Polozky_dokladu.Sleva_polozky) výše slevy
+        $this->DiscountRate = 0;
+        // (Polozky_dokladu.Zdanitelne_plneni) typ zdanitelného plnění (Základ daně, Z tuzemska, …)
+        $this->VATType = "Základní"; // TODO napevno?
+        // (Knihy.rowguid) ID skladu
+        $this->StoreID = "";
+        // (Katalog.rowguid) ID produktu
+        $this->ProductID = $vario_id_carrier; // TODO doplnit vario ID k produktu
+        // (Katalog_varianty_produktu.rowguid) ID varianty
+        $this->VariantID = '';
+        // (Polozky_dokladu.Stav) stav položky (DODAT, rezervovat, REZERVOVÁNO, fakturovat lze zapsat)
+        $this->State = ''; // TODO stav?
+        // (Doklady.rowguid) ID související zakázky (např. u faktur)
+        $this->OrderID = '';
+        // (Polozky_dokladu.Datum_dodani) (požadovaný) datum dodání
+        $this->DeliveryDate = null; // TODO datum dodani
+        // (Doklady.rowguid) ID dodacího listu (výdejky)
+        $this->QuantityGroups = array();
+        // (Polozky_dokladu.rowguid) ID položky dodacího listu (výdejky)
+        $this->DeliveryNoteID = '';
+        // (Doklady.rowguid) ID související zakázky
+        $this->DeliveryNoteItemID = '';
+        // (Polozky_dokladu.rowguid) ID související položky zakázky
+        $this->CommissionID = '';
+        // (Polozky_dokladu.Poznamka_polozky) poznámka
+        $this->CommissionItemID = '';
+        // (Polozky_dokladu.Poznamka_polozky) poznámka
+        $this->Note = '';
+        //
+        $this->Data1 = '';
+        //
+        $this->Data2 = '';
+        //
+        $this->Number1 = 0;
+        //
+        $this->Number2 = 0;
+        // volné pole pro případnou identifikaci položky shopem
+        $this->ExternID = '';
     }
 }

@@ -214,9 +214,31 @@ class TDocument extends ObjectToArray
         $documentOrderNumber = 1;
         // TDocumentItems
         foreach ($order->getOrderDetailList() as $orderDetail) {
-            $this->addDocumentItem(new TDocumentItem($orderDetail, $documentOrderNumber, $tax_rate, $vario_id_document));
+            $object = new StdClass();
+            $object->orderDetail = $orderDetail;
+            $object->documentOrderNumber = $documentOrderNumber;
+            $object->tax_rate = $tax_rate;
+            $object->vario_id_document = $vario_id_document;
+            $this->addDocumentItem(new TDocumentItem($object, true));
             $documentOrderNumber++;
         }
+
+        $this->fillCarrier($order, $vario_id_document, $documentOrderNumber);
+    }
+
+    /**
+     * @param $order Order
+     */
+    private function fillCarrier($order, $vario_id_document, $documentOrderNumber){
+        $carrier = new Carrier($order->id_carrier, HellHelper::getCsLanguage());
+
+        $object = new StdClass();
+        $object->carrier = $carrier;
+        $object->order = $order;
+        $object->vario_id_document = $vario_id_document;
+        $object->documentOrderNumber = $documentOrderNumber;
+
+        $this->addDocumentItem(new TDocumentItem($object, false));
     }
 
     /**

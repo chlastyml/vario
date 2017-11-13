@@ -11,7 +11,7 @@ if (!defined('_PS_VERSION_')){
 }
 
 include_once dirname(__FILE__) . '/classes/SoapMe.php';
-include_once dirname(__FILE__) . '/classes/Hell_Helper.php';
+include_once dirname(__FILE__) . '/classes/HellHelper.php';
 include_once dirname(__FILE__) . '/ajax/VarioHelper.php';
 
 class Hell_Vario extends Module
@@ -20,7 +20,7 @@ class Hell_Vario extends Module
     {
         $this->name = 'hell_vario';
         $this->tab = 'export';
-        $this->version = '0.8.8.9';
+        $this->version = '0.9.0.0';
         $this->author = 'Hellit';
         $this->controllers = array('vario');
         $this->need_instance = 1;
@@ -60,6 +60,7 @@ class Hell_Vario extends Module
         $sqlO = 'ALTER TABLE ' . _DB_PREFIX_ . 'orders ADD `id_vario` VARCHAR(255)';
         $sqlP = 'ALTER TABLE ' . _DB_PREFIX_ . 'product ADD `id_vario` VARCHAR(255)';
         $sqlOD = 'ALTER TABLE ' . _DB_PREFIX_ . 'order_detail ADD `id_vario` VARCHAR(255)';
+        $sqlC = 'ALTER TABLE ' . _DB_PREFIX_ . 'carrier ADD `id_vario` VARCHAR(255)';
         $db = Db::getInstance();
         try {
             $db->Execute( $sqlPA);
@@ -78,6 +79,11 @@ class Hell_Vario extends Module
         }
         try {
             $db->Execute( $sqlOD);
+        }catch (Exception $exception){
+            $e = $exception;
+        }
+        try {
+            $db->Execute( $sqlC);
         }catch (Exception $exception){
             $e = $exception;
         }
@@ -194,7 +200,7 @@ class Hell_Vario extends Module
         $varioID_order = Db::getInstance()->getRow($sqlGetProdcutVarioID)['id_vario'];
 
         $innerPath = 'hell_vario/invoices/' . $order->reference . '.pdf';
-        $path = Hell_Helper::removeLastItem(dirname(__FILE__), '\\') . $innerPath;
+        $path = HellHelper::removeLastItem(dirname(__FILE__), '\\') . $innerPath;
 
         if ($statusId == 4 AND
             $varioID_order AND
