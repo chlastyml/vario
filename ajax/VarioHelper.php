@@ -112,8 +112,7 @@ class VarioHelper extends ParentSetting
 
                 $stdClass = $document->getStdClass();
 
-                $varioID = null;
-                //$varioID = $this->getClient()->createOrUpdateDocument($stdClass);
+                $varioID = $this->getClient()->createOrUpdateDocument($stdClass);
 
                 // Aktualizace vario ids
                 if (empty($document->ID)) {
@@ -127,7 +126,11 @@ class VarioHelper extends ParentSetting
                 /** @var TDocumentItem $documentItem */
                 foreach ($document->getDocumentItems() as $documentItem) {
                     foreach ($loadDocumentItemsFromVario as $documentItemFromVario) {
-                        if ($documentItemFromVario->ExternID == $documentItem->ExternID AND empty($documentItem->ID)) {
+                        if ($documentItemFromVario->Note == 'Carrier' AND $documentItem->Note == 'Carrier'){
+                            $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'orders` SET id_vario_carrier = \'' . $documentItemFromVario->ID . '\' WHERE id_order = ' . $documentItem->ExternID . ';';
+                            Db::getInstance()->execute($sqlInsert);
+                        }
+                        elseif ($documentItemFromVario->ExternID == $documentItem->ExternID AND empty($documentItem->ID)) {
                             $sqlInsert = 'UPDATE `' . _DB_PREFIX_ . 'order_detail` SET id_vario = \'' . $documentItemFromVario->ID . '\' WHERE id_order_detail = ' . $documentItem->ExternID . ';';
                             Db::getInstance()->execute($sqlInsert);
                         }
@@ -217,6 +220,4 @@ class VarioHelper extends ParentSetting
 
         return $this->client;
     }
-
-
 }

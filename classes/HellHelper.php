@@ -232,4 +232,77 @@ class HellHelper
         }
         return $str;
     }
+
+    public static function convertCarrierNameToVarioID($reference_id)
+    {
+        $reference_id = intval($reference_id);
+
+        $path = dirname(__FILE__) . '/../configuration/carrier.json';
+
+        if (!file_exists($path)){
+            $mapTable = array();
+
+            array_push($mapTable, self::createStdClass(null, 'Česká pošta - Balík do ruky dobírka',    'E67DC21E-1C48-49FB-BC57-567E057DAF4D'));
+            array_push($mapTable, self::createStdClass(null, 'Česká pošta - Balík na poštu dobírka',   '401E4433-0201-4ECA-8F50-D976C55B96CE'));
+            array_push($mapTable, self::createStdClass(null, 'Česká pošta - Balík do ruky',            '1CEA970D-C0F1-44AD-892C-C421891184DD'));
+            array_push($mapTable, self::createStdClass(null, 'Česká pošta - Balík na poštu',           '53885AF5-D0EC-4DC0-A961-48592127D5EF'));
+            array_push($mapTable, self::createStdClass(null, 'Česká pošta - Balíkomat',                '07CAFA08-18ED-4FA0-836C-CF03F1962A78'));
+            array_push($mapTable, self::createStdClass(null, 'Česká pošta - Balíkomat dobírka',        '1EEDB2EF-B91C-4B2C-8D33-A5FC64B71BBD'));
+            array_push($mapTable, self::createStdClass(null, 'Osobní odběr Zásilkovna',                'DDDA1718-747D-4C7F-9E83-9DBAEFD665AF'));
+            array_push($mapTable, self::createStdClass(null, 'Osobní odběr Zásilkovna dobírka',        'A25BDE3C-32D8-4A12-A687-C9D54201980A'));
+            array_push($mapTable, self::createStdClass(null, 'Osobní odběr Zásilkovna SK',             '71644B7B-695A-430C-A4E6-225AEB7B9CBD'));
+            array_push($mapTable, self::createStdClass(null, 'Osobní odběr Zásilkovna SK dob.',        '0EEF8E61-B2B7-4594-9968-BB5E5BA557A7'));
+            array_push($mapTable, self::createStdClass(null, 'Slovenská pošta',                        'E025D2D8-2323-4741-B729-60A8783CE230'));
+            array_push($mapTable, self::createStdClass(null, 'Slovenská pošta dobírka',                '3BBDD819-A2B0-40FE-A7EE-F774FBFC0F05'));
+
+            $json = json_encode($mapTable, JSON_UNESCAPED_UNICODE);
+            $f = fopen($path, 'a+');
+            fwrite($f, print_r($json, true) . PHP_EOL);
+            fclose($f);
+        }else{
+            $strJson = file_get_contents($path);
+
+            $mapTable = json_decode($strJson, true);
+
+            $resultStr = '';
+            $flag = false;
+            for ($i = 0; $i < strlen($strJson); $i++){
+                $char = $strJson[$i];
+                $ascii = ord($char);
+
+                if ($char == "["){
+                    $flag = true;
+                }
+
+                if ($flag){
+                    $resultStr .= $char;
+                }
+            }
+
+            unlink($path);
+
+            $f = fopen($path, 'a+');
+            fwrite($f, print_r($resultStr, true) . PHP_EOL);
+            fclose($f);
+
+            $mapTable = json_decode($resultStr, true);
+
+        }
+
+        foreach ($mapTable as $item){
+            if ($item["id"] == $reference_id){
+                return $item["varioID"];
+            }
+        }
+
+        return null;
+    }
+
+    private static function createStdClass($id, $name, $varioID){
+        $result = new stdClass();
+        $result->id = $id;
+        $result->name = $name;
+        $result->varioID = $varioID;
+        return $result;
+    }
 }

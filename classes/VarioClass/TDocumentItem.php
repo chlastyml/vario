@@ -134,20 +134,23 @@ class TDocumentItem extends ObjectToArray
     }
 
     private function fillByCarrier($object){
+        /** @var Carrier $carrier */
         $carrier = $object->carrier;
         $documentOrderNumber = $object->documentOrderNumber;
         $vario_id_document = $object->vario_id_document;
+        /** @var Order $order */
         $order = $object->order;
 
-        $sqlGetProdcutVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "carrier WHERE id_carrier = " . $carrier->id;
-        $vario_id_carrier = Db::getInstance()->getRow($sqlGetProdcutVarioID)['id_vario'];
+        $vario_id_carrier = HellHelper::convertCarrierNameToVarioID($carrier->id_reference);
 
         $sqlOrderCarrier = "SELECT * FROM ". _DB_PREFIX_ . "order_carrier WHERE id_order = " . $order->id . " AND id_carrier = " . $carrier->id;
         $orderCarrier = Db::getInstance()->getRow($sqlOrderCarrier);
 
+        $sqlGetOrderCarrierVarioID = "SELECT `id_vario_carrier` FROM ". _DB_PREFIX_ . "orders WHERE id_order = " . $order->id;
+        $vario_id_document_item = Db::getInstance()->getRow($sqlGetOrderCarrierVarioID)['id_vario_carrier'];
 
         // (Polozky_dokladu.rowguid) ID položky dokladu, pokud se nepošle při založení, doplní se, při aktualizaci povinné
-        $this->ID = '';
+        $this->ID = $vario_id_document_item;
         // (Doklady.rowguid) ID dokladu, pokud se položka zapisuje samostatně, nutno vyplnit
         $this->DocumentID = $vario_id_document;
         // (Polozky_dokladu.Polozka_dokladu) číslo (pořadí) položky, v rámci dokladu musí být unikátní
@@ -200,7 +203,7 @@ class TDocumentItem extends ObjectToArray
         // (Polozky_dokladu.Poznamka_polozky) poznámka
         $this->CommissionItemID = '';
         // (Polozky_dokladu.Poznamka_polozky) poznámka
-        $this->Note = '';
+        $this->Note = 'Carrier';
         //
         $this->Data1 = '';
         //
@@ -210,6 +213,6 @@ class TDocumentItem extends ObjectToArray
         //
         $this->Number2 = 0;
         // volné pole pro případnou identifikaci položky shopem
-        $this->ExternID = '';
+        $this->ExternID = $order->id;
     }
 }

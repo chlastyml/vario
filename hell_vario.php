@@ -20,7 +20,7 @@ class Hell_Vario extends Module
     {
         $this->name = 'hell_vario';
         $this->tab = 'export';
-        $this->version = '0.9.0.0';
+        $this->version = '0.9.0.1';
         $this->author = 'Hellit';
         $this->controllers = array('vario');
         $this->need_instance = 1;
@@ -58,9 +58,9 @@ class Hell_Vario extends Module
 
         $sqlPA = 'ALTER TABLE ' . _DB_PREFIX_ . 'product_attribute ADD `id_vario` VARCHAR(255)';
         $sqlO = 'ALTER TABLE ' . _DB_PREFIX_ . 'orders ADD `id_vario` VARCHAR(255)';
+        $sqlOC = 'ALTER TABLE ' . _DB_PREFIX_ . 'orders ADD `id_vario_carrier` VARCHAR(255)';
         $sqlP = 'ALTER TABLE ' . _DB_PREFIX_ . 'product ADD `id_vario` VARCHAR(255)';
         $sqlOD = 'ALTER TABLE ' . _DB_PREFIX_ . 'order_detail ADD `id_vario` VARCHAR(255)';
-        $sqlC = 'ALTER TABLE ' . _DB_PREFIX_ . 'carrier ADD `id_vario` VARCHAR(255)';
         $db = Db::getInstance();
         try {
             $db->Execute( $sqlPA);
@@ -73,17 +73,17 @@ class Hell_Vario extends Module
             $e = $exception;
         }
         try {
+            $db->Execute( $sqlOC);
+        }catch (Exception $exception){
+            $e = $exception;
+        }
+        try {
             $db->Execute( $sqlP);
         }catch (Exception $exception){
             $e = $exception;
         }
         try {
             $db->Execute( $sqlOD);
-        }catch (Exception $exception){
-            $e = $exception;
-        }
-        try {
-            $db->Execute( $sqlC);
         }catch (Exception $exception){
             $e = $exception;
         }
@@ -198,16 +198,18 @@ class Hell_Vario extends Module
 
         $sqlGetProdcutVarioID = "SELECT `id_vario` FROM ". _DB_PREFIX_ . "orders WHERE id_order = " . $invoice->id_order;
         $varioID_order = Db::getInstance()->getRow($sqlGetProdcutVarioID)['id_vario'];
+        $varioID_order = 'asdas';
 
         $innerPath = 'hell_vario/invoices/' . $order->reference . '.pdf';
         $path = HellHelper::removeLastItem(dirname(__FILE__), '\\') . $innerPath;
 
         if ($statusId == 4 AND
             $varioID_order AND
-            $order->module == 'ps_wirepayment' AND
-            file_exists($path))
+            $order->module == 'ps_wirepayment'
+            //file_exists($path)
+        )
         {
-            $serverPath = Helper::removeLastItem($_SERVER['BASE'], '/');
+            $serverPath = HellHelper::removeLastItem($_SERVER['BASE'], '/');
 
             /*
             header('Content-Type: application/download');
