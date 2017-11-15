@@ -175,7 +175,7 @@ class VarioHelper extends ParentSetting
                 return;
             }
 
-            $this->getClient()->getDocument($vario_id);
+            $document = $this->getClient()->getDocument($vario_id);
 
             //TODO get invoice pdf url
             $invoice_pdf_url = 'http://www.axmag.com/download/pdfurl-guide.pdf';

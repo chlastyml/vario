@@ -6,7 +6,6 @@ $(document).ready(function(){
     $.ajax({
         url: '../modules/hell_vario/ajax/get_params.php',
         data: {
-            ajax        : true,
             action      : 'get_params',
             token       : new Date().getTime()
         },
@@ -27,7 +26,6 @@ $(document).ready(function(){
         $.ajax({
             url:"../modules/hell_vario/ajax/set_params.php",
             data:{
-                ajax        : true,
                 action      : 'set_params',
                 token       : new Date().getTime(),
                 wsdl_url    : $('#vario_wsdl').val()
@@ -46,12 +44,10 @@ $(document).ready(function(){
         $.ajax({
             url:"../modules/hell_vario/ajax/test_vario.php",
             data:{
-                ajax        : true,
                 action      : 'test_vario',
-                token       : new Date().getTime(),
-                wsdl_url    : $('#vario_wsdl').val()
+                token       : new Date().getTime()
             },
-            method:'POST',
+            method:'GET',
             success:function(data){
                 // Uspech
                 document.getElementById('test_vario_icon').className = 'icon-usd';
@@ -78,12 +74,10 @@ $(document).ready(function(){
         $.ajax({
             url:"../modules/hell_vario/ajax/import_product.php",
             data:{
-                ajax        : true,
                 action      : 'import_vario',
-                token       : new Date().getTime(),
-                wsdl_url    : $('#vario_wsdl').val()
+                token       : new Date().getTime()
             },
-            method:'POST',
+            method:'GET',
             success:function(data){
                 document.getElementById('tag-id').innerHTML = data;
                 console.log("#import_vario success. " + data);
@@ -106,11 +100,10 @@ $(document).ready(function(){
         $.ajax({
             url:"../modules/hell_vario/ajax/export_order.php",
             data:{
-                ajax        : true,
                 action      : 'export_order',
                 token       : new Date().getTime()
             },
-            method:'POST',
+            method:'GET',
             success:function(data){
                 document.getElementById('tag-id').innerHTML = data;
                 console.log("#export_order success. " + data);
@@ -134,11 +127,10 @@ $(document).ready(function(){
         $.ajax({
             url:"../modules/hell_vario/ajax/download_invoice.php",
             data:{
-                ajax        : true,
                 action      : 'download_invoice',
                 token       : new Date().getTime()
             },
-            method:'POST',
+            method:'GET',
             success:function(data){
                 document.getElementById('tag-id').innerHTML = data;
                 console.log("#download_invoice success. " + data);

@@ -261,6 +261,7 @@ class HellHelper
             fclose($f);
         }else{
             $strJson = file_get_contents($path);
+            $strJson = trim($strJson);
 
             $mapTable = json_decode($strJson, true);
 
