@@ -75,7 +75,9 @@ class ImportProduct
     private function SendJobsComplete($skip_data)
     {
         if ($this->hasSentOnVario){
+            $logger = new Logger('Send');
             $this->client->setJobs($skip_data);
+            $logger->logLine($skip_data, true);
         }
     }
 
@@ -181,7 +183,8 @@ class ImportProduct
                     case 'acInsert':
                     case 'acUpdate':
                         if (!$varioProduct->isReadyToSaveOrUpdate()) {
-                            array_push($this->bugRecords, 'IMPORT (SKIP - Neni hlavni product ani nebyl nalezen produkt v prestashop): ' . $varioProduct->getCode());
+                            array_push($this->bugRecords, 'IMPORT (SKIP): Neni hlavni product ani nebyl nalezen produkt v prestashop. Code: ' . $varioProduct->getCode());
+                            $this->SendJobsComplete($varioProduct->getJobIDs());
                             continue;
                         }
 
@@ -220,10 +223,6 @@ class ImportProduct
                         $varioVariant->setCombinationId($combinationId);
                     }
                 }
-            }
-
-            if ($varioProduct->getMain() == null) {
-                array_push($this->bugRecords, 'CONVERT (MAIN MISSING): ' . trim($varioProduct->getCode()));
             }
         }
 

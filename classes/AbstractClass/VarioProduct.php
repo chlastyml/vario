@@ -181,6 +181,20 @@ class VarioProduct
         return $this->succesJobIDs;
     }
 
+    public function getJobIDs(){
+        $ids = array();
+        if ($this->getMain() !== null){
+            array_push($ids, $this->getJobId());
+        }
+
+        /** @var VarioVariant $variant */
+        foreach ($this->getVariants() as $variant){
+            array_push($ids, $variant->getJobId());
+        }
+
+        return $ids;
+    }
+
     public function getMain()
     {
         return $this->main;
