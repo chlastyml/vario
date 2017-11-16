@@ -10,6 +10,7 @@ include_once dirname(__FILE__) . '/SoapMe.php';
 include_once dirname(__FILE__) . '/HellHelper.php';
 include_once dirname(__FILE__) . '/AbstractClass/VarioProduct.php';
 include_once dirname(__FILE__) . '/AbstractClass/VarioVariant.php';
+include_once dirname(__FILE__) . '/Logger.php';
 
 class ImportProduct
 {
@@ -204,13 +205,18 @@ class ImportProduct
      */
     private function tryFindExistProduct($varioProduct, $prestaProducts)
     {
-        // Zkusim najit produkt podle varioID
-        $sqlSelectProduct = "SELECT id_product FROM " . _DB_PREFIX_ . 'product WHERE id_vario = \'' . $varioProduct->getVarioId() . '\'';
-        $varioID_item = Db::getInstance()->getRow($sqlSelectProduct);
+        if (!empty($varioProduct->getVarioId())) {
+            // Zkusim najit produkt podle varioID
+            $sqlSelectProduct = "SELECT id_product FROM " . _DB_PREFIX_ . 'product WHERE id_vario = \'' . $varioProduct->getVarioId() . '\'';
+            $varioID_item = Db::getInstance()->getRow($sqlSelectProduct);
 
-        if ($varioID_item){
-            return new Product($varioID_item['id_product']);
+            if ($varioID_item) {
+                return new Product($varioID_item['id_product']);
+            }
         }
+
+        $logger = new Logger('FindExistProduct');
+        $logger->logLine('Hledani produktu ' . $varioProduct->getName() . ' s code: ' . $varioProduct->getCode());
 
         // Zkusim najit produkt podle code
         /** @var Product $prestaProduct */
@@ -220,6 +226,8 @@ class ImportProduct
             if ($reference == $varioProduct->getCode()) {
                 return new Product($prestaProduct['id_product']);
             }
+
+            $logger->logLine($prestaProduct->name . ' == ' . $varioProduct->getName() . '                  ' . ($prestaProduct->name == $varioProduct->getName()));
 
             if ($prestaProduct->name == $varioProduct->getName()){
                 return new Product($prestaProduct['id_product']);

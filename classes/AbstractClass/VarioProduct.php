@@ -16,7 +16,6 @@ class VarioProduct
 
     private $main = null;
     private $variants = array();
-    private $code = null;
 
     private $job_id = '';
     private $vario_id = '';
@@ -30,7 +29,6 @@ class VarioProduct
      */
     public function __construct($product)
     {
-        $this->code = $this->getUniqueFromCode($product);
         $this->action = $product->Job->Action;
 
         $this->addItem($product);
@@ -39,7 +37,7 @@ class VarioProduct
     public function addNewItem($product){
         $unigueCode = $this->getUniqueFromCode($product);
 
-        if ($this->code != $unigueCode){
+        if ($this->getCode() != $unigueCode){
             throw new Exception('Nesouhlsai');
         }
 
@@ -99,8 +97,7 @@ class VarioProduct
             $product = $this->getPrestaProduct();
 
             $product->name = [HellHelper::getCsLanguage() => $this->getName()];
-
-            // TODO co vse aktualizovat?
+            $product->reference = $this->getCode();
 
             $product->update();
         }
@@ -195,12 +192,15 @@ class VarioProduct
         return $this->variants;
     }
 
-    /**
-     * @return string
-     */
     public function getCode()
     {
-        return $this->code;
+        if ($this->main !== null){
+            return $this->getUniqueFromCode($this->main);
+        }else if (!empty($this->getVariants())){
+            return $this->getUniqueFromCode($this->getVariants()[0]);
+        }
+
+        throw new Exception('Vznikl Vario produckt bez main i variant entity');
     }
 
     /**

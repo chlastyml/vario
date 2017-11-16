@@ -15,7 +15,7 @@ class Logger
 
     public function __construct($loggerName = '')
     {
-        if ($loggerName == ''){
+        if (empty($loggerName)){
             $this->loggerName = 'default';
             $this->logDirPath = dirname(__FILE__) . '/../logs';
         }else {
