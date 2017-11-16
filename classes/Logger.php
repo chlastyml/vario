@@ -32,7 +32,7 @@ class Logger
         }
     }
 
-    public function logLine($text){
+    public function logLine($text, $onOneLine = false, $newOnTop = true){
         $logPath = $this->logDirPath . '/' . (new DateTime())->format('d-m-Y') . '.txt';
 
         $backupText = file_get_contents($logPath);
@@ -40,18 +40,65 @@ class Logger
         unlink($logPath);
 
         $f = fopen($logPath, 'a+');
-        fwrite($f, print_r((new DateTime())->format('Y-m-d H:i:s'), true) . PHP_EOL);
-        fwrite($f, print_r($text, true) . PHP_EOL);
-        fwrite($f, print_r('----------------------------------------------------------------------', true) . PHP_EOL);
-        fwrite($f, print_r($backupText, true) . PHP_EOL);
+
+        if ($onOneLine){
+            if ($newOnTop) {
+                $resultText = print_r((new DateTime())->format('Y-m-d H:i:s') . ': ' . $text . $backupText, true);
+            }else{
+                $resultText = print_r($backupText . (new DateTime())->format('Y-m-d H:i:s') . ': ' . $text, true);
+            }
+        }else {
+            if ($newOnTop) {
+                $resultText = print_r(
+                    (new DateTime())->format('Y-m-d H:i:s') . "\r\n" .
+                    $text . "\r\n" .
+                    '----------------------------------------------------------------------' . "\r\n" .
+                    $backupText , true);
+            }else{
+                $resultText = print_r(
+                    $backupText . "\r\n" .
+                    (new DateTime())->format('Y-m-d H:i:s') . "\r\n" .
+                    $text . "\r\n" .
+                    '----------------------------------------------------------------------', true);
+            }
+        }
+
+        fwrite($f, print_r($resultText, true) . PHP_EOL);
         fclose($f);
     }
 
-    public function logLineByNewFile($fileName, $text){
-        $f = fopen($this->logDirPath . '/' . $fileName . '.txt', 'a+');
-        fwrite($f, print_r((new DateTime())->format('Y-m-d H:i:s'), true) . PHP_EOL);
-        fwrite($f, print_r($text, true) . PHP_EOL);
-        fwrite($f, print_r('----------------------------------------------------------------------', true) . PHP_EOL);
+    public function logLineByNewFile($fileName, $text, $onOneLine = false, $newOnTop = true){
+        $logPath = $this->logDirPath . '/' . $fileName . '.txt';
+
+        $backupText = file_get_contents($logPath);
+
+        unlink($logPath);
+
+        $f = fopen($logPath, 'a+');
+
+        if ($onOneLine){
+            if ($newOnTop) {
+                $resultText = print_r((new DateTime())->format('Y-m-d H:i:s') . ': ' . $text . $backupText, true);
+            }else{
+                $resultText = print_r($backupText . (new DateTime())->format('Y-m-d H:i:s') . ': ' . $text, true);
+            }
+        }else {
+            if ($newOnTop) {
+                $resultText = print_r(
+                    (new DateTime())->format('Y-m-d H:i:s') . "\r\n" .
+                    $text . "\r\n" .
+                    '----------------------------------------------------------------------' . "\r\n" .
+                    $backupText , true);
+            }else{
+                $resultText = print_r(
+                    $backupText . "\r\n" .
+                    (new DateTime())->format('Y-m-d H:i:s') . "\r\n" .
+                    $text . "\r\n" .
+                    '----------------------------------------------------------------------', true);
+            }
+        }
+
+        fwrite($f, print_r($resultText, true) . PHP_EOL);
         fclose($f);
     }
 

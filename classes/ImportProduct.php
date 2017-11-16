@@ -10,7 +10,6 @@ include_once dirname(__FILE__) . '/SoapMe.php';
 include_once dirname(__FILE__) . '/HellHelper.php';
 include_once dirname(__FILE__) . '/AbstractClass/VarioProduct.php';
 include_once dirname(__FILE__) . '/AbstractClass/VarioVariant.php';
-include_once dirname(__FILE__) . '/Logger.php';
 
 class ImportProduct
 {
@@ -199,55 +198,6 @@ class ImportProduct
         }
     }
 
-    /**
-     * @param $varioProduct VarioProduct
-     * @return null|Product
-     */
-    private function tryFindExistProduct($varioProduct, $prestaProducts)
-    {
-        if (!empty($varioProduct->getVarioId())) {
-            // Zkusim najit produkt podle varioID
-            $sqlSelectProduct = "SELECT id_product FROM " . _DB_PREFIX_ . 'product WHERE id_vario = \'' . $varioProduct->getVarioId() . '\'';
-            $varioID_item = Db::getInstance()->getRow($sqlSelectProduct);
-
-            if ($varioID_item) {
-                return new Product($varioID_item['id_product']);
-            }
-        }
-
-        $logger = new Logger('FindExistProduct');
-        $logger->logLine('Hledani produktu ' . $varioProduct->getName() . ' s code: ' . $varioProduct->getCode());
-
-        // Zkusim najit produkt podle code
-        /** @var Product $prestaProduct */
-        foreach ($prestaProducts as $prestaProduct) {
-            $reference = $prestaProduct['reference'];
-
-            if ($reference == $varioProduct->getCode()) {
-                return new Product($prestaProduct['id_product']);
-            }
-
-            $logger->logLine($prestaProduct->name . ' == ' . $varioProduct->getName() . '                  ' . ($prestaProduct->name == $varioProduct->getName()));
-
-            if ($prestaProduct->name == $varioProduct->getName()){
-                return new Product($prestaProduct['id_product']);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @param $prestaProduct Product
-     * @param $varioVariant VarioVariant
-     * @return int
-     */
-    private function tryFindExistVariant($prestaProduct, $varioVariant)
-    {
-        $combinationId = CombinationCore::getIdByReference($prestaProduct->id, $varioVariant->getCode());
-
-        return $combinationId;
-    }
-
     private function findAndConnectPrestaProducts($varioProducts){
         $prestaProducts = Product::getProducts(HellHelper::getCsLanguage(), 0, 0, 'id_product', 'DESC');
         /** @var VarioProduct $varioProduct */
@@ -272,5 +222,49 @@ class ImportProduct
         }
 
         return $varioProducts;
+    }
+
+    /**
+     * @param $varioProduct VarioProduct
+     * @return null|Product
+     */
+    private function tryFindExistProduct($varioProduct, $prestaProducts)
+    {
+        if (!empty($varioProduct->getVarioId())) {
+            // Zkusim najit produkt podle varioID
+            $sqlSelectProduct = "SELECT id_product FROM " . _DB_PREFIX_ . 'product WHERE id_vario = \'' . $varioProduct->getVarioId() . '\'';
+            $varioID_item = Db::getInstance()->getRow($sqlSelectProduct);
+
+            if ($varioID_item) {
+                return new Product($varioID_item['id_product']);
+            }
+        }
+
+        // Zkusim najit produkt podle code
+        foreach ($prestaProducts as $prestaProduct) {
+            $reference = $prestaProduct['reference'];
+
+            if (!empty($reference) AND $reference == $varioProduct->getCode()) {
+                return new Product($prestaProduct['id_product']);
+            }
+
+            if ($prestaProduct['name'] == $varioProduct->getName()){
+                return new Product($prestaProduct['id_product']);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param $prestaProduct Product
+     * @param $varioVariant VarioVariant
+     * @return int
+     */
+    private function tryFindExistVariant($prestaProduct, $varioVariant)
+    {
+        $combinationId = CombinationCore::getIdByReference($prestaProduct->id, $varioVariant->getCode());
+
+        return $combinationId;
     }
 }

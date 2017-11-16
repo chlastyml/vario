@@ -20,7 +20,7 @@ class Hell_Vario extends Module
     {
         $this->name = 'hell_vario';
         $this->tab = 'export';
-        $this->version = '0.9.0.5';
+        $this->version = '0.9.1.0';
         $this->author = 'Hellit';
         $this->controllers = array('vario');
         $this->need_instance = 1;

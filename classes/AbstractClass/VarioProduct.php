@@ -98,6 +98,7 @@ class VarioProduct
 
             $product->name = [HellHelper::getCsLanguage() => $this->getName()];
             $product->reference = $this->getCode();
+            $product->active = false;
 
             $product->update();
         }
@@ -144,7 +145,7 @@ class VarioProduct
                 $sexId = $sexAttribute['id_attribute'];
 
                 $idCom = $this->getPrestaProduct()->addCombinationEntity(
-                    $varioVariant->getPrice(), 0, 0, 'unic_impact', 'ecotax', 1, null, $varioVariant->getCode(), null, null, null);
+                    $varioVariant->getPrice(), 0, 0, 'unic_impact', 'ecotax', 9999, null, $varioVariant->getCode(), null, null, null);
 
                 $combination = new Combination((int)$idCom);
                 $combination->setAttributes(array($sizeId, $colorId, $sexId));

@@ -61,7 +61,7 @@ class VarioHelper extends ParentSetting
         try {
             $wsdlUrl = $this->getWsdlUrl();
 
-            $import = new ImportProduct($wsdlUrl);
+            $import = new ImportProduct($wsdlUrl, true);
             $result = $import->import_from_vario();
 
             if ($result !== '') {
