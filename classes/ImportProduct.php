@@ -204,10 +204,6 @@ class ImportProduct
      */
     private function tryFindExistProduct($varioProduct, $prestaProducts)
     {
-        if ($varioProduct->getVarioId() == null OR $varioProduct->getVarioId() == ''){
-            return null;
-        }
-
         // Zkusim najit produkt podle varioID
         $sqlSelectProduct = "SELECT id_product FROM " . _DB_PREFIX_ . 'product WHERE id_vario = \'' . $varioProduct->getVarioId() . '\'';
         $varioID_item = Db::getInstance()->getRow($sqlSelectProduct);
@@ -220,7 +216,12 @@ class ImportProduct
         /** @var Product $prestaProduct */
         foreach ($prestaProducts as $prestaProduct) {
             $reference = $prestaProduct['reference'];
+
             if ($reference == $varioProduct->getCode()) {
+                return new Product($prestaProduct['id_product']);
+            }
+
+            if ($prestaProduct->name == $varioProduct->getName()){
                 return new Product($prestaProduct['id_product']);
             }
         }
