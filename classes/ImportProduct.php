@@ -13,7 +13,7 @@ include_once dirname(__FILE__) . '/AbstractClass/VarioVariant.php';
 
 class ImportProduct
 {
-    private $hasSentOnVario = false;
+    private $hasSentOnVario;
 
     /** @var SoapMe $client */
     private $client = null;
@@ -124,15 +124,18 @@ class ImportProduct
     {
         // Abstrakce nad vario produktem
         $varioProducts = array();
+        $skip_data = array();
         foreach ($products as $product) {
             try {
                 // Data bez Data nebo s neplatnym Bookem ignorujeme
                 if ($product->Data == null OR $product->Data->Book !== 'Katalog Eshop') {
                     $this->setJobDataSkipCount++;
                     if ($product->Data == null){
-                        array_push($this->bugRecords, 'CONVERT (SKIP): ' . trim($product->Job->ObjectID) . ', ' . $product->Job->Action);
+                        array_push($this->bugRecords, 'CONVERT (SKIP WITHOUT DATA): ' . trim($product->Job->ObjectID) . ', ' . $product->Job->Action);
+                        array_push($skip_data, $product->Job->ID);
                     }else {
                         array_push($this->bugRecords, 'CONVERT (SKIP): ' . $product->Data->Book . ', ' . trim($product->Data->ProductName));
+                        array_push($skip_data, $product->Job->ID);
                     }
                     continue;
                 }
@@ -159,10 +162,12 @@ class ImportProduct
                     $varioProduct->addNewItem($product);
                 }
             } catch (Exception $exception) {
-                array_push($this->bugRecords, 'CONVERT: ' . trim($product->Data->ProductName) . ': ' . $exception->getMessage());
+                array_push($this->bugRecords, 'CONVERT (ERROR): ' . trim($product->Data->ProductName) . ': ' . $exception->getMessage());
                 $this->setJobDataSkipCount++;
             }
         }
+
+        $this->SendJobsComplete($skip_data);
 
         return $varioProducts;
     }
@@ -190,6 +195,7 @@ class ImportProduct
                         break;
                     case 'acDelete':
                         $varioProduct->delete();
+                        $this->SendJobsComplete($varioProduct->getSuccesJobIDs());
                         break;
                 }
             }catch (Exception $exception){

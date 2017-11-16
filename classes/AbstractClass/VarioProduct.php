@@ -173,6 +173,7 @@ class VarioProduct
         if ($prestaProduct !== null){
             $prestaProduct->active = false;
             $prestaProduct->update();
+            array_push($this->succesJobIDs, $this->getJobId());
         }
     }
 
