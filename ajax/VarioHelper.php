@@ -112,6 +112,12 @@ class VarioHelper extends ParentSetting
 
                 $stdClass = $document->getStdClass();
 
+                $path = dirname(__FILE__) . '/../logs/Json/' . $orderId . '.txt';
+
+                file_put_contents($path, json_encode($stdClass));
+
+                $this->log('Test exportu');
+
                 $varioID = $this->getClient()->createOrUpdateDocument($stdClass);
 
                 // Aktualizace vario ids

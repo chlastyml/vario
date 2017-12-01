@@ -100,9 +100,9 @@ class TDocumentItem extends ObjectToArray
         // (Knihy.rowguid) ID skladu
         $this->StoreID = "";
         // (Katalog.rowguid) ID produktu
-        $this->ProductID = $varioID_product; // TODO doplnit vario ID k produktu
+        $this->ProductID = $varioID_item; // TODO plnime varioID varianty
         // (Katalog_varianty_produktu.rowguid) ID varianty
-        $this->VariantID = $varioID_item;
+        $this->VariantID = null; //$varioID_item;
         // (Polozky_dokladu.Stav) stav položky (DODAT, rezervovat, REZERVOVÁNO, fakturovat lze zapsat)
         $this->State = ''; // TODO stav?
         // (Doklady.rowguid) ID související zakázky (např. u faktur)
