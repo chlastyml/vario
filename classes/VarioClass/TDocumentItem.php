@@ -10,6 +10,8 @@ include_once dirname(__FILE__) . '/ObjectToArray.php';
 
 class TDocumentItem extends ObjectToArray
 {
+    private $STORE_ID = "E5C042A1-B522-46C8-B19A-78DBDB49B751";
+
     public $ID;
     public $DocumentID;
     public $DocumentOrderNumber;
@@ -98,7 +100,7 @@ class TDocumentItem extends ObjectToArray
         // (Polozky_dokladu.Zdanitelne_plneni) typ zdanitelného plnění (Základ daně, Z tuzemska, …)
         $this->VATType = "Základní"; // TODO napevno?
         // (Knihy.rowguid) ID skladu
-        $this->StoreID = "";
+        $this->StoreID = $this->STORE_ID;
         // (Katalog.rowguid) ID produktu
         $this->ProductID = $varioID_item; // TODO plnime varioID varianty
         // (Katalog_varianty_produktu.rowguid) ID varianty
