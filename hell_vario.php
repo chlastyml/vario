@@ -20,7 +20,7 @@ class Hell_Vario extends Module
     {
         $this->name = 'hell_vario';
         $this->tab = 'export';
-        $this->version = '0.9.1.4';
+        $this->version = '0.9.1.5';
         $this->author = 'Hellit';
         $this->controllers = array('vario');
         $this->need_instance = 1;
@@ -56,37 +56,7 @@ class Hell_Vario extends Module
             return false;
         }
 
-        $sqlPA = 'ALTER TABLE ' . _DB_PREFIX_ . 'product_attribute ADD `id_vario` VARCHAR(255)';
-        $sqlO = 'ALTER TABLE ' . _DB_PREFIX_ . 'orders ADD `id_vario` VARCHAR(255)';
-        $sqlOC = 'ALTER TABLE ' . _DB_PREFIX_ . 'orders ADD `id_vario_carrier` VARCHAR(255)';
-        $sqlP = 'ALTER TABLE ' . _DB_PREFIX_ . 'product ADD `id_vario` VARCHAR(255)';
-        $sqlOD = 'ALTER TABLE ' . _DB_PREFIX_ . 'order_detail ADD `id_vario` VARCHAR(255)';
-        $db = Db::getInstance();
-        try {
-            $db->Execute( $sqlPA);
-        }catch (Exception $exception){
-            $e = $exception;
-        }
-        try {
-            $db->Execute( $sqlO);
-        }catch (Exception $exception){
-            $e = $exception;
-        }
-        try {
-            $db->Execute( $sqlOC);
-        }catch (Exception $exception){
-            $e = $exception;
-        }
-        try {
-            $db->Execute( $sqlP);
-        }catch (Exception $exception){
-            $e = $exception;
-        }
-        try {
-            $db->Execute( $sqlOD);
-        }catch (Exception $exception){
-            $e = $exception;
-        }
+        $this->updateDb();
 
         return true;
     }
@@ -220,6 +190,29 @@ class Hell_Vario extends Module
             header('Location: ' . $serverPath . 'modules/' . $innerPath);
 
             //header('Location: /modules/hell_vario/invoices/' . $order->reference . '.pdf');
+        }
+    }
+
+    protected function updateDb(){
+        $sqlPA = 'ALTER TABLE ' . _DB_PREFIX_ . 'product_attribute ADD `id_vario` VARCHAR(255)';
+        $sqlO = 'ALTER TABLE ' . _DB_PREFIX_ . 'orders ADD `id_vario` VARCHAR(255)';
+        $sqlOC = 'ALTER TABLE ' . _DB_PREFIX_ . 'orders ADD `id_vario_carrier` VARCHAR(255)';
+        $sqlP = 'ALTER TABLE ' . _DB_PREFIX_ . 'product ADD `id_vario` VARCHAR(255)';
+        $sqlOD = 'ALTER TABLE ' . _DB_PREFIX_ . 'order_detail ADD `id_vario` VARCHAR(255)';
+
+        $this->executeSqlWithIgnoreException($sqlPA);
+        $this->executeSqlWithIgnoreException($sqlO);
+        $this->executeSqlWithIgnoreException($sqlOC);
+        $this->executeSqlWithIgnoreException($sqlP);
+        $this->executeSqlWithIgnoreException($sqlOD);
+    }
+
+    protected function executeSqlWithIgnoreException($sql){
+        $db = Db::getInstance();
+        try {
+            $db->Execute($sql);
+        }catch (Exception $exception){
+            $e = $exception;    // Ignore
         }
     }
 }
